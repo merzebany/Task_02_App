@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Assign Task - TaskFlow{% endblock %}
+
+
+
+{% block content %}
+
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold"><i class="bi bi-plus-circle me-2"></i>Assign New Task</h2>
+  <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="POST" action="{{ url_for('assign_task') }}">
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="title" class="form-label fw-bold">Task Title <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="title" name="title"
+            placeholder="e.g., Implement user authentication" required>
+        </div>
+        <div class="col-md-6">
+          <label for="assigned_to" class="form-label fw-bold">Assign To <span class="text-danger">*</span></label>
+          <select class="form-select" id="assigned_to" name="assigned_to" dir="rtl" required>
+            <option value="">اختار المسؤول عن النشاط .....</option>
+            {% for member in members %}
+            <option value="{{ member.user_id }}"> {{ member.full_name }} ({{ member.username }})</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="description" class="form-label fw-bold">Description</label>
+        <textarea class="form-control arabic-textarea" id="description" name="description" rows="4" lang="ar" dir="rtl"
+          placeholder="اكتب النشاط المطلوب ................."></textarea>
+      </div>
+
+      <div class="row mb-4">
+
+        <div class="col-md-6">
+          <label for="start_date" class="form-label fw-bold">Start Date <span class="text-danger">*</span></label>
+          <input type="datetime-local" class="form-control" id="start_date" name="start_date" required>
+        </div>
+
+        <div class="col-md-6">
+          <label for="end_date" class="form-label fw-bold">End Date (Deadline) <span
+              class="text-danger">*</span></label>
+          <input type="datetime-local" class="form-control" id="end_date" name="end_date" required>
+        </div>
+
+      </div>
+
+      <div class="row mb-4">
+
+        <div class="col-md-6">
+          <label for="Project_assigned" class="form-label fw-bold">Assign Project</label>
+          <select class="form-select" id="Project_assigned" name="Project_assigned" dir="rtl">
+            <option value="">اختار اسم المشروع .....</option>
+            {% for project in projects %}
+            <option value="{{ project.project_id }}"> {{ project.project_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+      </div>
+
+
+      <div class="row mb-6">
+        <div class="d-grid d-md-flex justify-content-md-end gap-2">
+          <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-circle me-1"></i> Assign Task
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Set default dates (today for start, 3 days from now for end)
+  document.addEventListener('DOMContentLoaded', function () {
+    const now = new Date();
+    const startDateInput = document.getElementById('start_date');
+    const endDateInput = document.getElementById('end_date');
+
+    // Set start date to today at 9 AM
+    const startDate = new Date(now);
+    startDate.setHours(9, 0, 0, 0);
+    startDateInput.value = startDate.toISOString().slice(0, 16);
+
+    // Set end date to 3 days from now at 5 PM
+    const endDate = new Date(now);
+    endDate.setDate(endDate.getDate() + 3);
+    endDate.setHours(17, 0, 0, 0);
+    endDateInput.value = endDate.toISOString().slice(0, 16);
+
+    // Ensure end date is after start date
+    endDateInput.min = startDateInput.value;
+
+    startDateInput.addEventListener('change', function () {
+      endDateInput.min = this.value;
+      if (new Date(endDateInput.value) <= new Date(this.value)) {
+        const newEndDate = new Date(this.value);
+        newEndDate.setDate(newEndDate.getDate() + 1);
+        endDateInput.value = newEndDate.toISOString().slice(0, 16);
+      }
+    });
+  });
+
+
+
+</script>
+{% endblock %}

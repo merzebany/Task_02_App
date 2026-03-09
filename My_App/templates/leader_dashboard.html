@@ -1,0 +1,502 @@
+{% extends "base.html" %} {% block title %}Leader Dashboard - TaskFlow{%
+endblock %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold"><i class="bi bi-speedometer2 me-2"></i>Team Dashboard</h2>
+  <a href="{{ url_for('assign_task') }}" class="btn btn-primary">
+    <i class="bi bi-plus-circle me-1"></i> Assign New Task
+  </a>
+</div>
+
+<!-- Overdue Tasks Alert Section -->
+<!-- <div id="overdue-alert-section" class="mb-4" style="display: none;">
+  <div class="alert alert-danger d-flex align-items-center" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-3" style="font-size: 1.5rem;"></i>
+    <div>
+      <h5 class="alert-heading">Action Required: Overdue Tasks</h5>
+      <p class="mb-0">You have tasks that require your attention. Please review and take action below.</p>
+    </div>
+  </div>
+</div> -->
+
+<!-- Team Overview Cards -->
+<div class="row mb-4">
+  <div class="col-md-3">
+    <div class="card text-white bg-primary">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="card-subtitle mb-2 opacity-75">Total Tasks</h6>
+            <h2 class="card-title mb-0">{{ tasks|length }}</h2>
+          </div>
+          <i class="bi bi-tasks fs-1 opacity-25"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-white bg-success">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="card-subtitle mb-2 opacity-75">Completed</h6>
+            <h2 class="card-title mb-0">
+              {{ tasks|selectattr('status', 'equalto', 'completed')|list|length
+              }}
+            </h2>
+          </div>
+          <i class="bi bi-check-circle fs-1 opacity-25"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-white bg-warning">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="card-subtitle mb-2 opacity-75">Pending</h6>
+            <h2 class="card-title mb-0">
+              {{ tasks|selectattr('status', 'equalto', 'pending')|list|length }}
+            </h2>
+          </div>
+          <i class="bi bi-hourglass-split fs-1 opacity-25"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-white bg-danger">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="card-subtitle mb-2 opacity-75">Overdue</h6>
+            <h2 class="card-title mb-0">
+              {{ Overdue_Tasks_V|length }}
+            </h2>
+          </div>
+          <i class="bi bi-clock-history fs-1 opacity-25"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tasks Table -->
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span>Team Tasks</span>
+
+    <form class="d-flex" role="search">
+      <select id="formGroupExampleInput" class="me-2 form-select memberClass text-center">
+
+        <option value="">Filter by team member</option>
+        {% for member in members %}
+        <option value="{{ member.user_id }}"> {{ member.full_name }} ({{ member.username }})</option>
+        {% endfor %}
+
+      </select>
+
+      <button class="btn btn-sm btn-outline-secondary Filter_But" data-bs-toggle="tooltip" data-bs-placement="top"
+        data-bs-title="Filter By Team Member Name" onclick="Filter_Memeber_Fun()" type="button">
+        <i id="Filter_Member_Icon" class="bi bi-funnel"></i>
+      </button>
+    </form>
+
+
+    <form class="d-flex" role="search">
+      <input class="form-control me-2 Search_But" type="search" placeholder="Search" aria-label="Search">
+      <button class="btn btn-sm btn-outline-secondary Search_But" data-bs-toggle="tooltip" data-bs-placement="top"
+        data-bs-title="Search Tasks" id="SearchBut" type="button" onclick="Search_Fun()"><i class="bi bi-search"></i>
+      </button>
+    </form>
+
+
+
+
+    <div class="btn-group">
+      <button class="btn btn-sm btn-outline-primary active" data-filter="all" onclick="window.location.href='/'">
+        All
+      </button>
+      <button class="btn btn-sm btn-outline-primary" data-filter="pending">
+        Pending
+      </button>
+      <button class="btn btn-sm btn-outline-warning" data-filter="delayed">
+        Delayed
+      </button>
+      <button class="btn btn-sm btn-outline-success" data-filter="completed">
+        Completed
+      </button>
+      <button class="btn btn-sm btn-outline-danger" data-filter="OK" onclick="window.location.href='/Filter_Ok_Task'">
+        OK.
+      </button>
+
+    </div>
+  </div>
+
+
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0" id="data-table">
+        <thead class="table-light">
+          <tr>
+            <th>Task</th>
+            <th class="text-center">Assigned To</th>
+            <th class="text-center">Start Date</th>
+            <th class="text-center">Deadline</th>
+            <th class="text-center">Status</th>
+            <th class="text-center">Resolve</th>
+            <th class="text-center">Actions</th>
+            <th class="text-center">OK.</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for task in tasks %}
+          <tr class="task-row" data-status="{{ task.status }}">
+            <td>
+              <div class="fw-bold">{{ task.title }}</div>
+              <div class="text-muted small">
+                {{ task.description|truncate(40) }}
+              </div>
+              <div class="text-muted small">
+                المشروع : {{ task.project_name }}
+              </div>
+            </td>
+            <td class="text-center">{{ task.assigned_to_fullname }}</td>
+            <td class="text-center">{{ task.start_date.strftime('%b %d, %Y') }}</td>
+            <td class="text-center">
+              <span
+                class="deadline-text {% if task.current_deadline < now and task.status != 'completed' %}deadline-overdue{% endif %}">
+                {{ task.current_deadline.strftime('%b %d, %Y') }}
+              </span>
+              {% if task.status == 'delayed' and task.reason_for_delay %}
+              <div class="text-muted small mt-1">
+                <i class="bi bi-info-circle me-1"></i> Delayed: {{
+                task.reason_for_delay|truncate(30) }}
+              </div>
+              {% endif %}
+            </td>
+            <td class="text-center">
+              {% if task.status == 'completed' %}
+              <span class="status-badge status-completed">
+                <i class="bi bi-check-lg me-1"></i> Completed
+              </span>
+
+              {% elif task.status == 'delayed' and task.current_deadline < now %} <span
+                class="status-badge status-overdue-delayed">
+                <i class="bi bi-clock me-1"></i> Delayed
+                <i class="bi bi-exclamation-lg me-1"></i> Overdue {% elif
+                task.current_deadline < now %} <span class="status-badge status-overdue">
+                  <i class="bi bi-exclamation-lg me-1"></i> Overdue
+                  </span>
+                  {% elif task.status == 'delayed' %}
+                  <span class="status-badge status-delayed">
+                    <i class="bi bi-clock me-1"></i> Delayed
+                  </span>
+                  </span>
+
+                  {% else %}
+                  <span class="status-badge status-pending">
+                    <i class="bi bi-hourglass me-1"></i> Pending
+                  </span>
+
+                  {% endif %}
+            </td>
+
+            <td class="text-center">
+
+              <div class="action-buttons">
+                {% if task.status != 'completed' and task.current_deadline < now %} <button
+                  class="btn btn-sm btn-warning resolve-task-btn" data-task-id="{{ task.task_id }}"
+                  data-task-title="{{ task.title }}" data-bs-toggle="modal" data-bs-target="#resolveTaskModal">
+                  <i class="bi bi-bell-fill me-1"></i> Resolve
+                  </button>
+                  {% endif %}
+              </div>
+            </td>
+
+            <td class="text-center">
+
+              <div class="action-buttons">
+                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
+                  data-bs-target="#taskDetailsModal" data-task-id="{{ task.task_id }}"
+                  data-task-title="{{ task.title }}" data-task-desc="{{ task.description }}"
+                  data-task-start="{{ task.start_date.strftime('%Y-%m-%dT%H:%M') }}"
+                  data-task-deadline="{{ task.current_deadline.strftime('%Y-%m-%dT%H:%M') }}"
+                  data-task-status="{{ task.status }}" data-task-member="{{ task.assigned_to_fullname }}"
+                  data-task-reason="{{ task.reason_for_delay if task.reason_for_delay else '' }}">
+                  <i class="bi bi-eye me-1"></i> View
+                </button>
+
+                <button class="btn btn-sm btn-outline-primary Edit_But" data-bs-toggle="tooltip" data-bs-placement="top"
+                  data-bs-title="Edit User" onclick="window.location.href='/EditTask?EE={{  task.task_id  }}'">
+                  <i class="bi bi-pencil-square"></i> Edit
+                </button>
+
+
+                <button id="Delete_But" class="btn btn-sm btn-outline-danger  Delete_View_But" type="button"
+                  data-bs-placement="top" data-bs-title="Delete Task" data-bs-toggle="modal"
+                  data-bs-target="#exampleModal" data-class-value="{{  task.task_id }}"
+                  onclick="Del_Atr('{{ task.title }}','{{ task.task_id }}')">
+                  <i class="bi bi-trash"></i> Delete
+                </button>
+              </div>
+            </td>
+
+
+            <td class="text-center">
+
+              <button id="Dec_But" class="btn btn-sm btn-outline-danger  Dec_View_But" type="button"
+                data-bs-placement="top" data-bs-title="Task Dec" data-class-value="{{  task.task_id }}"
+                onclick="window.location.href='/DecTask/{{ task.task_id }}/{{ task.status }}'">
+                <i class="bi bi-journal-check"></i></i> Ok
+              </button>
+
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add this hidden element with the count -->
+
+<div id="task-data" data-overdue-count="{{ tasks | selectattr('requires_leader_attention') | list | length }}"></div>
+
+<!-- Resolve Task Modal -->
+<div class="modal fade" id="resolveTaskModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Resolve Overdue Task</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="resolve-task-form">
+        <div class="modal-body">
+          <input type="hidden" id="resolve-task-id" />
+          <div class="mb-3">
+            <label class="form-label fw-bold" id="resolve-task-title"></label>
+            <p class="text-muted" id="resolve-task-desc"></p>
+          </div>
+
+          <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            This task is overdue and requires your attention. Please take action
+            below.
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Action</label>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="resolveAction" id="actionComplete" value="complete"
+                checked />
+              <label class="form-check-label" for="actionComplete">
+                Mark as Completed
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="resolveAction" id="actionPostpone" value="postpone" />
+              <label class="form-check-label" for="actionPostpone">
+                Postpone Deadline
+              </label>
+            </div>
+          </div>
+
+          <div id="postpone-section" style="display: none">
+            <div class="mb-3">
+              <label for="newDeadline" class="form-label">New Deadline</label>
+              <input type="datetime-local" class="form-control" id="newDeadline" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary">Confirm Action</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Task Details Modal -->
+<div class="modal fade" id="taskDetailsModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="task-details-title">Task Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label fw-bold">Description</label>
+          <p id="task-details-desc" class="mb-0"></p>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">Assigned To</label>
+            <p id="task-details-member" class="mb-0"></p>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">Status</label>
+            <p id="task-details-status" class="mb-0"></p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">Start Date</label>
+            <p id="task-details-start" class="mb-0"></p>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">Current Deadline</label>
+            <p id="task-details-deadline" class="mb-0"></p>
+          </div>
+        </div>
+        <div class="mb-3" id="task-details-reason-container" style="display: none">
+          <label class="form-label fw-bold text-warning">Reason for Delay</label>
+          <p id="task-details-reason" class="mb-0"></p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- **********************************************  delete Modal **********************************************-->
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Delete User</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete the task ?
+        <hr>
+        <span id="Delelet_Words"></span>
+        <hr>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+        <form method="POST" action="{{ url_for('delete_task') }}" style="display:inline;">
+          <input type="hidden" name="task_id" id="task_id_to_delete" value="">
+          <input type="hidden" name="task_title" id="task_title_to_delete" value="">
+          <button type="submit" class="btn btn-danger"> <i class="fas fa-trash"></i> Delete
+          </button>
+        </form>
+
+
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!--  ***************************** Pationation Area ********************************************** -->
+
+<div class="container sticky-bottom text-center mx-auto fw-bold" style="position: absolute; width: 30%">
+  <div class="row text-center">
+    <div class="col">
+      <div class="row">
+        <div class="col p-0 text-center">
+          <label class="form-label" for="NoOfRowPage" style="padding-top: 6px">
+            No of row per page
+          </label>
+        </div>
+        <div class="col p-0 text-center">
+          <input class="form-control" type="number" value="5" min="3" max="6" id="NoOfRowPage" style="width: 70px" />
+        </div>
+        <div class="col-6 p-0 text-center">
+          <nav aria-label="Page navigation example">
+            <ul class="pagination" id="pagination" style="cursor: pointer; color: white; border-color: white;"></ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--  ***************************** End Pationation Area ****************************************** -->
+
+{% endblock %} {% block scripts %}
+
+<script src="/My_App/js/leader_dashboard.js"></script>
+
+
+<!--  *********************************** but name of user in delete form ******************** -->
+<script>
+
+  function Del_Atr(Del_Atr_V, user_id_v) {
+
+    let New_Del_Atr = document.getElementById("Delelet_Words")
+    New_Del_Atr.innerHTML = ""
+    New_Del_Atr.innerHTML = Del_Atr_V
+
+    // Set the hidden input value for user_id
+    let New_Del_Atr_1 = document.getElementById("task_id_to_delete");
+    New_Del_Atr_1.value = user_id_v;
+
+    let New_Del_Atr_2 = document.getElementById("task_title_to_delete");
+    New_Del_Atr_2.value = Del_Atr_V;
+  }
+
+
+
+
+  // ********************************  FilterBy member Ass Value      ******************************* 
+
+
+  // ******************************** Filter by member    **********************
+  function Filter_Memeber_Fun() {
+
+    let Filter_by_Member_v = document.querySelector(".memberClass").value.trim()
+    let Filter_Member_Icon_V = document.getElementById("Filter_Member_Icon")
+
+    localStorage.setItem("Filter_Member_Icon_VV", Filter_by_Member_v)
+    localStorage.setItem("Filter_by_Member_IconClass", Filter_Member_Icon_V.getAttribute("class"))
+
+
+
+    if (Filter_by_Member_v == "" || Filter_Member_Icon_V.getAttribute("class") == "bi bi-x-square") {
+      window.location.href = "/"
+      console.log("Empty or reset filter, redirecting to home.");
+    } else {
+      window.location.href = "/Filter_Data_ByMember?TT=" + Filter_by_Member_v
+      Filter_by_Member_v.value = localStorage.getItem("Filter_by_Member_VV")
+    }
+  }
+
+  let Filter_by_member_v = document.querySelector(".memberClass")
+  let Filter_member_Icon_V = document.getElementById("Filter_member_Icon")
+
+
+  if (localStorage.getItem("Filter_by_member_IconClass") === "bi bi-funnel") {
+
+    Filter_member_Icon_V.classList.remove("bi-funnel")
+    Filter_member_Icon_V.classList.add("bi-x-square")
+    localStorage.setItem("Filter_by_member_IconClass", "bi bi-x-square")
+    Filter_by_member_v.value = localStorage.getItem("Filter_by_member_VV")
+
+  } else if (localStorage.getItem("Filter_by_member_IconClass") === "bi-x-square") {
+
+    Filter_member_Icon_V.classList.remove("bi-x-square")
+    Filter_member_Icon_V.classList.add("bi-funnel")
+    localStorage.setItem("Filter_by_member_IconClass", "bi bi-funnel")
+    Filter_by_member_v.value = "Choose member for filter......."
+  }
+
+
+</script>
+
+{% endblock %}

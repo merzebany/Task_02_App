@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Users - TaskFlow{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold"><i class="bi bi-people"></i>Team Management</h2>
+  <a href="{{ url_for('add_user') }}" class="btn btn-primary">
+    <i class="bi bi-plus-circle me-1"></i> Assign New User
+  </a>
+</div>
+
+
+<div class="card">
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th class="text-center">User_ID</th>
+            <th class="text-center">User Name</th>
+            <th class="text-center">password</th>
+            <th class="text-center">role</th>
+            <th class="text-center">full_name</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr class="task-row" data-status="{{ user.role }}">
+            <td class="text-center">{{ user.user_id }}</td>
+            <td class="text-center">{{ user.username }}</td>
+            <td class="text-center">{{ user.password }}</td>
+            <td class="text-center">{{ user.role }}</td>
+            <td class="text-center">{{ user.full_name }}</td>
+
+            <td class="text-center" style="display:table-cell;">
+
+              <button class="btn btn-sm btn-outline-secondary Edit_But" data-bs-toggle="tooltip" data-bs-placement="top"
+                data-bs-title="Edit User" onclick="window.location.href='/EditUser?EE={{ user.user_id }}'">
+                <i class="bi bi-pencil-square"></i> Edit
+              </button>
+
+
+              <button id="Delete_But" class="btn btn-sm btn-outline-danger Delete_View_But" type="button"
+                data-bs-placement="top" data-bs-title="Delete User" data-bs-toggle="modal"
+                data-bs-target="#exampleModal" data-class-value="{{  user.user_id }}"
+                onclick="Del_Atr('{{ user.full_name }}','{{ user.user_id }}')">
+                <i class="bi bi-trash"></i> Delete
+              </button>
+
+            </td>
+
+          </tr>
+
+
+          {% endfor %}
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Modal delete-->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Delete User</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete the user ?
+        <hr>
+        <span id="Delelet_Words"></span>
+        <hr>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+        <form method="POST" action="{{ url_for('delete_user') }}" style="display:inline;">
+          <input type="hidden" name="user_id" id="user_id_to_delete" value="">
+          <input type="hidden" name="user_fullName" id="user_fullName_to_delete" value="">
+          <button type="submit" class="btn btn-danger"> <i class="fas fa-trash"></i> Delete
+          </button>
+        </form>
+
+
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!--  *********************************** but name of user in delete form ******************** -->
+<script>
+
+  function Del_Atr(Del_Atr_V, user_id_v) {
+
+    let New_Del_Atr = document.getElementById("Delelet_Words")
+    New_Del_Atr.innerHTML = ""
+    New_Del_Atr.innerHTML = Del_Atr_V
+
+    // Set the hidden input value for user_id
+    let New_Del_Atr_1 = document.getElementById("user_id_to_delete");
+    New_Del_Atr_1.value = user_id_v;
+
+    let New_Del_Atr_2 = document.getElementById("user_fullName_to_delete");
+    New_Del_Atr_2.value = Del_Atr_V;
+  }
+</script>
+
+
+{% endblock %}

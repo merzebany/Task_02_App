@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Edit User - TaskFlow{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold"><i class="bi bi-pencil-square me-2"></i>Edit User Data</h2>
+  <a href="{{ url_for('Team_management') }}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i> Back to Team Management
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="POST" action="{{ url_for('EditUser') }}">
+
+
+      <div class="row mb-3">
+        <input type="hidden" name="user_id" value="{{ users[0] }}">
+
+        <div class="col-md-6">
+          <label for="user_name" class="form-label fw-bold">User Name <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="user_name" name="user_name" placeholder="Enter user name "
+            required value="{{ users[1] }} ">
+        </div>
+
+        <div class="col-md-6">
+          <label for="password" class="form-label fw-bold">Password <span class="text-danger">*</span></label>
+          <input type="password" class="form-control" id="password" name="password" placeholder="Enter user password"
+            required value="{{ users[2] }} ">
+        </div>
+
+        <div class="col-md-6">
+          <label for="user_role" class="form-label fw-bold">User Role <span class="text-danger">*</span></label>
+          <select class="form-select" id="user_role" name="user_role" required>
+            <option value="">Select user role</option>
+            <option value="leader" {% if users[3].strip()=="leader" %} selected {% endif %}>leader</option>
+            <option value="member" {% if users[3].strip()=="member" %} selected {% endif %}>member</option>
+          </select>
+        </div>
+
+
+        <div class="col-md-6">
+          <label for="full_name" class="form-label fw-bold">Full Name <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="full_name" name="full_name" placeholder="Enter user full name"
+            required value="{{ users[4] }}">
+        </div>
+
+
+
+      </div>
+
+
+
+      <div class="d-grid d-md-flex justify-content-md-end gap-2">
+        <a href="{{ url_for('Team_management') }}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-check-circle me-1"></i> Edit User
+        </button>
+      </div>
+
+
+
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+</script>
+{% endblock %}

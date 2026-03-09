@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block title %}Edit Task - TaskFlow{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold"><i class="bi bi-pencil-square me-2"></i>Edit Task</h2>
+  <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="POST" action="{{ url_for('EditTask') }}">
+
+      <div class="row mb-3">
+
+        <input type="hidden" name="task_id" value="{{ tasks[0] }}">
+
+        <div class="col-md-6">
+          <label for="title" class="form-label fw-bold">Task Title <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="title" name="title"
+            placeholder="e.g., Implement user authentication" required value="{{ tasks[1] }}">
+        </div>
+
+        <div class="col-md-6">
+          <label for="assigned_to" class="form-label fw-bold">Assign To <span class="text-danger">*</span></label>
+          <select class="form-select" id="assigned_to" name="assigned_to" required>
+            <option value="">Select team member</option>
+            {% for member in members %}
+            <!-- <option value="{{ member.user_id }}"> {{ member.full_name }} ({{ member.username }})</option> -->
+            <option value="{{ member.user_id }}" {% if member.user_id==tasks[3] %} selected {% endif %}>{{
+              member.full_name }} ({{ member.username }})</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="description" class="form-label fw-bold">Description</label>
+        <textarea class="form-control" id="description" name="description" rows="4"
+          placeholder="Provide detailed instructions, requirements, and expectations for this task...">{{ tasks[2] }}</textarea>
+      </div>
+
+      <div class="row mb-4">
+
+        <div class="col-md-6">
+          <label for="start_date" class="form-label fw-bold">Start Date <span class="text-danger">*</span></label>
+          <input type="datetime-local" class="form-control" id="start_date" name="start_date" required
+            value="{{ tasks[5]|replace(' ', 'T') }}">
+        </div>
+
+        <div class="col-md-6">
+          <label for="end_date" class="form-label fw-bold">End Date (Deadline) <span
+              class="text-danger">*</span></label>
+          <input type="datetime-local" class="form-control" id="end_date" name="end_date" required
+            value="{{ tasks[7]|replace(' ', 'T') }}">
+        </div>
+
+      </div>
+
+      <div class="row mb-4">
+
+        <div class="col-md-6">
+          <label for="original_end_date" class="form-label fw-bold">Original End Date <span
+              class="text-danger">*</span></label>
+          <input type="datetime-local" class="form-control" id="original_end_date" name="original_end_date" required
+            value="{{ tasks[6]|replace(' ', 'T') }}">
+        </div>
+
+        <div class="col-md-6">
+          <label for="completed_at" class="form-label fw-bold">completed_at </label>
+          <input type="datetime-local" class="form-control" id="completed_at" name="completed_at"
+            value="{{ tasks[10]|replace(' ', 'T') }}">
+        </div>
+
+      </div>
+
+      <div class="mb-3">
+        <label for="reason_for_delay" class="form-label fw-bold">Reason for delay</label>
+        <textarea class="form-control" id="reason_for_delay" name="reason_for_delay" rows="4"
+          placeholder="Provide detailed instructions, requirements, and expectations for this task...">{{ tasks[9] }}</textarea>
+      </div>
+
+
+      <div class="row mb-4">
+
+        <div class="col-md-6">
+          <label for="status" class="form-label fw-bold">Status <span class="text-danger">*</span></label>
+          <select class="form-select" id="status" name="status" required>
+            <option value="">Select status</option>
+            <option value="pending" {% if tasks[8]=="pending" %} selected {% endif %}>pending</option>
+            <option value="delayed" {% if tasks[8]=="delayed" %} selected {% endif %}>delayed</option>
+            <option value="completed" {% if tasks[8]=="completed" %} selected {% endif %}>completed</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+
+          <label for="Dec" class="form-label fw-bold">Dec <span class="text-danger">*</span></label>
+          <select class="form-select" id="Dec" name="Dec" required>
+            <option value="">Select Dec</option>
+            <option value="0" {% if tasks.Dec==0 %} selected {% endif %}>False</option>
+            <option value="1" {% if tasks.Dec==1 %} selected {% endif %}>True</option>
+          </select>
+
+        </div>
+
+
+        <div class="col-md-6">
+          <label for="project" class="form-label fw-bold">Assign Project</label>
+          <select class="form-select" id="project" name="project">
+            <option value="">Select project</option>
+            {% for project in projects %}
+            <option value="{{ project.project_id }}" {% if project.project_id==tasks.task_project_id %} selected {%
+              endif %}> {{
+              project.project_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+  </div>
+
+
+
+
+</div>
+
+
+
+<div class="d-grid d-md-flex justify-content-md-end gap-2">
+  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancel</a>
+
+  <button type="submit" class="btn btn-primary">
+    <i class="bi bi-check-circle me-1"></i> Edit Task
+  </button>
+</div>
+</form>
+</div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<!-- <script>
+  // Set default dates (today for start, 3 days from now for end)
+  document.addEventListener('DOMContentLoaded', function () {
+    const now = new Date();
+    const startDateInput = document.getElementById('start_date');
+    const endDateInput = document.getElementById('end_date');
+
+    // Set start date to today at 9 AM
+    const startDate = new Date(now);
+    startDate.setHours(9, 0, 0, 0);
+    startDateInput.value = startDate.toISOString().slice(0, 16);
+
+    // Set end date to 3 days from now at 5 PM
+    const endDate = new Date(now);
+    endDate.setDate(endDate.getDate() + 3);
+    endDate.setHours(17, 0, 0, 0);
+    endDateInput.value = endDate.toISOString().slice(0, 16);
+
+    // Ensure end date is after start date
+    endDateInput.min = startDateInput.value;
+
+    startDateInput.addEventListener('change', function () {
+      endDateInput.min = this.value;
+      if (new Date(endDateInput.value) <= new Date(this.value)) {
+        const newEndDate = new Date(this.value);
+        newEndDate.setDate(newEndDate.getDate() + 1);
+        endDateInput.value = newEndDate.toISOString().slice(0, 16);
+      }
+    });
+  });
+</script> -->
+{% endblock %}

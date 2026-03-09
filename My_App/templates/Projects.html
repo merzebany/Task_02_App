@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Projects - TaskFlow{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold"><i class="bi bi-bank"></i> Project Management</h2>
+  <a href="{{ url_for('add_project') }}" class="btn btn-primary">
+
+    <i class="bi bi-plus-circle me-1"></i> Assign New Project
+  </a>
+</div>
+
+
+<div class="card">
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th class="text-center">Project_ID</th>
+            <th class="text-center">Project Name</th>
+            <th class="text-center">Project Group</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for project in Projects %}
+          <tr class="task-row">
+            <td class="text-center">{{ project.project_id }}</td>
+            <td class="text-center">{{ project.project_name }}</td>
+            <td class="text-center">{{ project.project_group }}</td>
+
+            <td class="text-center" style="display:table-cell;">
+
+              <button class="btn btn-sm btn-outline-secondary Edit_But" data-bs-toggle="tooltip" data-bs-placement="top"
+                data-bs-title="Edit project" onclick="window.location.href='/EditProject?EE={{ project.project_id }}'">
+                <i class="bi bi-pencil-square"></i> Edit
+              </button>
+
+
+              <button id="Delete_But" class="btn btn-sm btn-outline-danger Delete_View_But" type="button"
+                data-bs-placement="top" data-bs-title="Delete project" data-bs-toggle="modal"
+                data-bs-target="#exampleModal" data-class-value="{{  project.project_id }}"
+                onclick="Del_Atr('{{ project.project_name }}','{{ project.project_id }}')">
+                <i class="bi bi-trash"></i> Delete
+              </button>
+
+            </td>
+
+          </tr>
+
+
+          {% endfor %}
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal delete-->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Delete project</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete the project ?
+        <hr>
+        <span id="Delelet_Words"></span>
+        <hr>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+        <form method="POST" action="{{ url_for('delete_project') }}" style="display:inline;">
+          <input type="hidden" name="project_id" id="project_id_to_delete" value="">
+          <input type="hidden" name="project_name" id="project_name_to_delete" value="">
+          <button type="submit" class="btn btn-danger"> <i class="fas fa-trash"></i> Delete
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!--  *********************************** but name of user in delete form ******************** -->
+<script>
+
+  function Del_Atr(Del_Atr_V, user_id_v) {
+
+    let New_Del_Atr = document.getElementById("Delelet_Words")
+    New_Del_Atr.innerHTML = ""
+    New_Del_Atr.innerHTML = Del_Atr_V
+
+    // Set the hidden input value for user_id
+    let New_Del_Atr_1 = document.getElementById("project_id_to_delete");
+    New_Del_Atr_1.value = user_id_v;
+
+    let New_Del_Atr_2 = document.getElementById("project_name_to_delete");
+    New_Del_Atr_2.value = Del_Atr_V;
+  }
+</script>
+
+
+{% endblock %}
