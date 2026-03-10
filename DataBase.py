@@ -22,37 +22,36 @@ try:
     
     # db = pymssql.connect(server='MERZ\MYDATABASE', user='merzo', password='merzo1976', database='Task_App')
 
-#     # **********************************************************************************************************
-#     # **********************pymssql*************************
-#     server=r'MERZ\MYDATABASE'
-#     db = pymssql.connect(
-#     server=server,
-#     user='merzo',
-#     password='merzo1976',
-#     database='Task_App',
-#     charset='UTF-8'    # ← Correct for pymssql
+    # **********************************************************************************************************
+    # **********************pymssql*************************
+   # server=r'41.38.197.252'
+   # db = pymssql.connect(
+   # server=server,
+   # user='merzo',
+   # password='merzo1976',
+   # database='Task_App',
+   # charset='UTF-8'    # ← Correct for pymssql
                
-# )
+   #   )
 
-
-#     print("Connection successful!")
+   # print("Connection successful!")
    
-#     cr = db.cursor()
+   # cr = db.cursor()
 
-#     def commit_and_close():
+   # def commit_and_close():
     
-#       db.commit() 
-#       db.close()
+   #    db.commit() 
+   #    db.close()
       
 # # **********************pymssql*************************
 # # **********************************************************************************************************
 
-# **********************************************************************************************************
-# **********************pyodbcsql*************************
+# # **********************************************************************************************************
+# # **********************pyodbcsql*************************
 
    db = pyodbc.connect(
         'DRIVER={ODBC Driver 17 for SQL Server};'
-        'SERVER=MERZ\\MYDATABASE;'
+        'SERVER=41.38.197.252;'  #    MERZ\\MYDATABASE
         'DATABASE=Task_App;'
         'UID=merzo;'
         'PWD=merzo1976;'
