@@ -6,7 +6,7 @@ import json
 import pyodbc
 
 # Define your connection parameters
-server = 'MERZ\MYDATABASE'  # e.g., 'localhost' or '41.38.197.252' 'DESKTOP-LMBLE4G\MERZOSQLEXPRESS'
+server = '41.38.197.252'  # e.g., 'localhost' or '41.38.197.252' 'DESKTOP-LMBLE4G\MERZOSQLEXPRESS'
 database = 'Task_App'
 username = 'merzo'    # Use None if using Windows Authentication
 password = 'merzo1976'     # Use None if using Windows Authentication
