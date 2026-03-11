@@ -123,7 +123,7 @@ def login():
 
         from DataBase import user_check
         user_data = user_check(username)
-        print(user_data)
+       
 
         if not user_data:
           return "User not found", 401
@@ -137,7 +137,7 @@ def login():
             hasattr(user, 'is_authenticated')
             login_user(user)
             flash(f'Welcome back, {user.full_name}!', 'success')
-            print(user.full_name)
+            
             return redirect(url_for('dashboard'))
        
         else:
@@ -157,18 +157,20 @@ def logout():
 def dashboard():
     # return render_template('Test.html')
       now = datetime.utcnow()
-      
+
+    #   now = datetime.now()
+
       if current_user.role == 'leader':
         # Get all tasks created by this leader
           from DataBase import Task__assigned_by_CurrentUser
           Task_data = Task__assigned_by_CurrentUser (current_user.id)
-
+          
           from DataBase import user_member
           members = user_member()
 
           from DataBase import Overdue_Tasks
           Overdue_Tasks_V = Overdue_Tasks(current_user.id,now)
-
+         
           
           return render_template('leader_dashboard.html', tasks=Task_data, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V)
       else:
@@ -695,9 +697,6 @@ def check_notifications():
 
 
     return jsonify({'has_notifications': False})
-
-
-
 
 
 # ****************************************************************************************************************

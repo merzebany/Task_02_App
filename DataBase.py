@@ -6,14 +6,14 @@ import json
 import pyodbc
 
 # Define your connection parameters
-server = 'MERZ\MYDATABASE'  # e.g., 'localhost' or '41.38.197.252' 'DESKTOP-LMBLE4G\MERZOSQLEXPRESS'
-database = 'Task_App'
-username = 'merzo'    # Use None if using Windows Authentication
-password = 'merzo1976'     # Use None if using Windows Authentication
+# server = 'MERZ\MYDATABASE'  # e.g., 'localhost' or '41.38.197.252' 'DESKTOP-LMBLE4G\MERZOSQLEXPRESS'
+# database = 'Task_App'
+# username = 'merzo'    # Use None if using Windows Authentication
+# password = 'merzo1976'     # Use None if using Windows Authentication
 
 # Create the connection string
 # connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
-connection_string = f'SERVER={server}; user={username}; password={password};database={database}'
+# connection_string = f'SERVER={server}; user={username}; password={password};database={database}'
 
 # Connect to the database
 
@@ -24,7 +24,7 @@ try:
 
     # **********************************************************************************************************
     # **********************pymssql*************************
-   # server=r'41.38.197.252'
+   # server=r'41.38.197.252'  #41.38.197.252  MERZ\\MYDATABASE
    # db = pymssql.connect(
    # server=server,
    # user='merzo',
@@ -48,9 +48,9 @@ try:
 
 # # **********************************************************************************************************
 # # **********************pyodbcsql*************************
-
+   
    db = pyodbc.connect(
-        'DRIVER={ODBC Driver 17 for SQL Server};'
+        'DRIVER={SQL Server};'
         'SERVER=41.38.197.252;'  #    MERZ\\MYDATABASE
         'DATABASE=Task_App;'
         'UID=merzo;'
@@ -77,7 +77,7 @@ try:
    def user_table(user_id):
     
       cr.execute(f"SELECT user_id, username, password, role, full_name FROM [user] WHERE user_id = ?", (user_id,))
-      
+      # cr.execute(f"SELECT user_id, username, password, role, full_name FROM [user] WHERE user_id ='{user_id}'")
       return  cr.fetchone()
     
 
@@ -107,7 +107,9 @@ try:
 
    def Delete_user(user_id):
       
-      cr.execute(f"delete from [user] where user_id = ?", (user_id,))
+      # cr.execute(f"delete from [user] where user_id = ?", (user_id,))
+      cr.execute(f"delete from [user] where user_id = '{user_id}'")
+
       db.commit()
 
 
@@ -120,7 +122,8 @@ try:
 
    def Delete_task(task_id):
       
-      cr.execute(f"delete from [task] where task_id = ?", (task_id,))
+      # cr.execute(f"delete from [task] where task_id = ?", (task_id,))
+      cr.execute(f"delete from [task] where task_id = '{task_id}'")
       db.commit()
 
 
@@ -133,9 +136,6 @@ try:
 
    def Task__assigned_by_CurrentUser (current_user_id):    #user_name
      
-    #   cr.execute(f"select * from [task] where assigned_by_id ='{current_user_id}' ORDER BY current_deadline ")  
-    #   return  cr.fetchall()
-      
       cr.execute(f"select * from [Task_View] where assigned_by_id ='{current_user_id}' and Dec = 0 ORDER BY current_deadline ")  
       return  cr.fetchall()
    
@@ -145,8 +145,7 @@ try:
 
    def Task__assigned_by_CurrentUser_Filter_Ok (current_user_id):    #user_name
      
-    #   cr.execute(f"select * from [task] where assigned_by_id ='{current_user_id}' ORDER BY current_deadline ")  
-    #   return  cr.fetchall()
+
       
       cr.execute(f"select * from [Task_View] where assigned_by_id ='{current_user_id}' and Dec = 1 ORDER BY current_deadline ")  
       return  cr.fetchall()
@@ -160,7 +159,9 @@ try:
     #   cr.execute(f"select * from [task] where assigned_by_id ='{current_user_id}' ORDER BY current_deadline ")  
     #   return  cr.fetchall()
       
-      cr.execute(f"select * from [Task_View] where assigned_by_id = ? and current_deadline < ? and Dec = 0  ORDER BY current_deadline ", (current_user_id,))  
+      cr.execute(f"select * from [Task_View] where assigned_by_id = ? and current_deadline < ? and Dec = 0  ORDER BY current_deadline ", (current_user_id,now))  
+      # cr.execute(f"select * from [Task_View] where assigned_by_id = '{current_user_id}' and current_deadline < '{now}' and Dec = 0  ORDER BY current_deadline ")  
+
       return  cr.fetchall()
    
 
@@ -174,30 +175,35 @@ try:
     #   cr.execute(f"select * from [task] where assigned_to_id ='{current_user_id}' ORDER BY current_deadline ")  
     #   return  cr.fetchall()
      
-      cr.execute(f"select * from [Task_View] where assigned_to_id = ? and Dec = 0 ORDER BY current_deadline ", (current_user_id,))  
+      cr.execute(f"select * from [Task_View] where assigned_to_id = ? and Dec = 0 ORDER BY current_deadline ", (current_user_id,))
+      # cr.execute(f"select * from [Task_View] where assigned_to_id = '{current_user_id}' and Dec = 0 ORDER BY current_deadline ")  
       return  cr.fetchall()
 
 
 # **********************************************************************************************************
-# ********************************  Search in Data Task in assigned_by_id *********************************************************
+# ********************************  Search in Data Task in assigned_by_id **********************************
 # **********************************************************************************************************
 
 
    def Filter_task_assigned_by_id(Search_V_01,current_user_id):
 
-      cr.execute(f"select * from Task_View where assigned_by_id = ? and Dec = 0 and ( title LIKE  '%' + ? + '%' or description LIKE  '%' + ? + '%' or project_name LIKE  '%' + ? + '%')  ORDER BY title ", (current_user_id, Search_V_01, Search_V_01, Search_V_01))
+      cr.execute(f"select * from Task_View where assigned_by_id = ? and Dec = 0 and ( title LIKE  '%' + ? + '%' or description LIKE  '%' + ? + '%' or project_name LIKE  '%' + ? + '%')  ORDER BY current_deadline ", (current_user_id, Search_V_01, Search_V_01, Search_V_01))
+      # cr.execute(f"select * from Task_View where assigned_by_id = '{current_user_id}' and Dec = 0 and ( title LIKE  '%' + '{Search_V_01}' + '%' or description LIKE  '%' + '{Search_V_01}' + '%' or project_name LIKE  '%' + '{Search_V_01}' + '%')  ORDER BY title ")
+
       return  cr.fetchall()
     
 # **********************************************************************************************************
 
 # # **********************************************************************************************************
-# # ********************************  Task  overdue_tasks  FOR LEADER        ********************************************
+# # ********************************  Task  overdue_tasks  FOR LEADER        ********************************* 
 # # **********************************************************************************************************
 
    def Overdue_Tasks (ssigned_by_id,now):    
      
       cr.execute(f"select * from [Task_View] where assigned_by_id = ? and Dec = 0 and (current_deadline < ? or requires_leader_attention = 1) and status <> 'completed'", (ssigned_by_id, now))
-   
+      # cr.execute(f"select * from [Task_View] where assigned_by_id = '{ssigned_by_id}' and Dec = 0 and (current_deadline < '{now}' or requires_leader_attention = 1) and status <> 'completed'")
+      # cr.execute(f"select * from [Task_View] where assigned_by_id = %s and Dec = 0 and (current_deadline < %s or requires_leader_attention = 1) and status <> 'completed'", (ssigned_by_id, now))
+      
       return  cr.fetchall()
 
 # # **********************************************************************************************************
@@ -207,7 +213,7 @@ try:
    def Overdue_Tasks_Filter_Ok (ssigned_by_id):    
      
       cr.execute(f"select * from [Task_View] where assigned_by_id = ? and Dec = 1  and status <> 'completed'", (ssigned_by_id))
-   
+      # cr.execute(f"select * from [Task_View] where assigned_by_id = '{ssigned_by_id}' and Dec = 1  and status <> 'completed'", (ssigned_by_id))
       return  cr.fetchall()
    
 # # **********************************************************************************************************
@@ -217,7 +223,7 @@ try:
    def Overdue_Tasks_Member (assigned_to_id,now):    
      
       cr.execute(f"select * from [Task_View] where assigned_to_id = ? and Dec = 0 and (current_deadline < ? or requires_leader_attention = 1) and status <> 'completed'", (assigned_to_id, now))
-      
+      # cr.execute(f"select * from [Task_View] where assigned_to_id = '{assigned_to_id}' and Dec = 0 and (current_deadline < '{now}' or requires_leader_attention = 1) and status <> 'completed'", (assigned_to_id, now))
       return  cr.fetchall()
    
 # # **********************************************************************************************************
@@ -228,6 +234,7 @@ try:
      
  
       cr.execute(f"select * from [Task_View] where task_id = ? ", (task_id,))  
+      # cr.execute(f"select * from [Task_View] where task_id = '{task_id}' ")  
       return  cr.fetchone()
 
 
@@ -243,7 +250,7 @@ try:
 
       cr.execute(f"select * from Task_View where assigned_to_id = ? and Dec = 0  ORDER BY current_deadline ", (Filter_by_member_v))
       return  cr.fetchall()
-   
+     
 
 # # **********************************************************************************************************
 # # ********************************  user filter by member   *****************************************************
@@ -282,9 +289,7 @@ try:
    def ADD_Task(title, description, assigned_to_id,assigned_by_id, start_date, original_end_date, current_deadline, status, created_at,Project_id):
                
 
-    #  cr.execute(f"insert into [task] (title, description, assigned_to_id,assigned_by_id, start_date, original_end_date, current_deadline, status, created_at) values('{title}', '{description}', '{assigned_to_id}', '{assigned_by_id}', '{start_date}', '{original_end_date}', '{current_deadline}', '{status}', '{created_at}')")
-    #  db.commit()
-
+   
      cr.execute("""
             INSERT INTO [task] (
                 title, description, assigned_to_id, assigned_by_id, 
