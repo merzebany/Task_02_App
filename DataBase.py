@@ -50,7 +50,7 @@ try:
 # # **********************pyodbcsql*************************
 
    db = pyodbc.connect(
-        'DRIVER={ODBC Driver 17 for SQL Server};'
+        'DRIVER={SQL Server};'
         'SERVER=41.38.197.252;'  #    MERZ\\MYDATABASE
         'DATABASE=Task_App;'
         'UID=merzo;'
