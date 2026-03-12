@@ -76,6 +76,7 @@ try:
 
    def user_table(user_id):
     
+    
       cr.execute(f"SELECT user_id, username, password, role, full_name FROM [user] WHERE user_id = ?", (user_id,))
       # cr.execute(f"SELECT user_id, username, password, role, full_name FROM [user] WHERE user_id ='{user_id}'")
       return  cr.fetchone()
