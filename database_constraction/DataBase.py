@@ -24,24 +24,24 @@ try:
 
     # **********************************************************************************************************
     # **********************pymssql*************************
-   server=r'41.38.197.252'  #41.38.197.252  MERZ\\MYDATABASE
-   db = pymssql.connect(
-   server=server,
-   user='merzo',
-   password='merzo1976',
-   database='Task_App',
-   charset='cp1256'    # ← Correct for pymssql
+   # server=r'41.38.197.252'  #41.38.197.252  MERZ\\MYDATABASE
+   # db = pymssql.connect(
+   # server=server,
+   # user='merzo',
+   # password='merzo1976',
+   # database='Task_App',
+   # charset='UTF-8'    # ← Correct for pymssql
                
-     )
+   #   )
 
-   print("Connection successful!")
+   # print("Connection successful!")
    
-   cr = db.cursor()
-   
-   def commit_and_close():
+   # cr = db.cursor()
+
+   # def commit_and_close():
     
-      db.commit() 
-      db.close()
+   #    db.commit() 
+   #    db.close()
       
 # # **********************pymssql*************************
 # # **********************************************************************************************************
@@ -49,24 +49,24 @@ try:
 # # **********************************************************************************************************
 # # **********************pyodbcsql*************************
    
-   # db = pyodbc.connect(
-   #      'DRIVER={SQL Server};'
-   #      'SERVER=41.38.197.252;'  #    MERZ\\MYDATABASE
-   #      'DATABASE=Task_App;'
-   #      'UID=merzo;'
-   #      'PWD=merzo1976;'
-   #      'CHARSET=UTF8;'
-   #  )
+   db = pyodbc.connect(
+        'DRIVER={SQL Server Native Client 11.0};'
+        'SERVER=41.38.197.252;'  #    MERZ\\MYDATABASE
+        'DATABASE=Task_App;'
+        'UID=merzo;'
+        'PWD=merzo1976;'
+        'CHARSET=UTF8;'
+    )
 
 
-   # print("Connection successful!")
-   # print(pyodbc.drivers())
-   # cr = db.cursor()
+   print("Connection successful!")
+   print(pyodbc.drivers())
+   cr = db.cursor()
 
-   # def commit_and_close():
+   def commit_and_close():
     
-   #    db.commit() 
-   #    db.close()
+      db.commit() 
+      db.close()
 
 
 
@@ -77,7 +77,7 @@ try:
    def user_table(user_id):
     
 
-      cr.execute(f"SELECT user_id, username, password, role, full_name FROM [user] WHERE user_id = %s", (user_id,))
+      cr.execute(f"SELECT user_id, username, password, role, full_name FROM [user] WHERE user_id = ?", (user_id,))
       # cr.execute(f"SELECT user_id, username, password, role, full_name FROM [user] WHERE user_id ='{user_id}'")
       return  cr.fetchone()
     
@@ -108,7 +108,7 @@ try:
 
    def Delete_user(user_id):
       
-      # cr.execute(f"delete from [user] where user_id = %s", (user_id,))
+      # cr.execute(f"delete from [user] where user_id = ?", (user_id,))
       cr.execute(f"delete from [user] where user_id = '{user_id}'")
 
       db.commit()
@@ -123,7 +123,7 @@ try:
 
    def Delete_task(task_id):
       
-      # cr.execute(f"delete from [task] where task_id = %s", (task_id,))
+      # cr.execute(f"delete from [task] where task_id = ?", (task_id,))
       cr.execute(f"delete from [task] where task_id = '{task_id}'")
       db.commit()
 
@@ -136,7 +136,7 @@ try:
 # # **********************************************************************************************************
 
    def Task__assigned_by_CurrentUser (current_user_id):    #user_name
-      cr = db.cursor(as_dict=True) 
+     
       cr.execute(f"select * from [Task_View] where assigned_by_id ='{current_user_id}' and Dec = 0 ORDER BY current_deadline ")  
       return  cr.fetchall()
    
@@ -160,7 +160,7 @@ try:
     #   cr.execute(f"select * from [task] where assigned_by_id ='{current_user_id}' ORDER BY current_deadline ")  
     #   return  cr.fetchall()
       
-      cr.execute(f"select * from [Task_View] where assigned_by_id = %s and current_deadline < %s and Dec = 0  ORDER BY current_deadline ", (current_user_id,now))  
+      cr.execute(f"select * from [Task_View] where assigned_by_id = ? and current_deadline < ? and Dec = 0  ORDER BY current_deadline ", (current_user_id,now))  
       # cr.execute(f"select * from [Task_View] where assigned_by_id = '{current_user_id}' and current_deadline < '{now}' and Dec = 0  ORDER BY current_deadline ")  
 
       return  cr.fetchall()
@@ -175,8 +175,8 @@ try:
      
     #   cr.execute(f"select * from [task] where assigned_to_id ='{current_user_id}' ORDER BY current_deadline ")  
     #   return  cr.fetchall()
-      cr = db.cursor(as_dict=True)
-      cr.execute(f"select * from [Task_View] where assigned_to_id = %s and Dec = 0 ORDER BY current_deadline ", (current_user_id,))
+     
+      cr.execute(f"select * from [Task_View] where assigned_to_id = ? and Dec = 0 ORDER BY current_deadline ", (current_user_id,))
       # cr.execute(f"select * from [Task_View] where assigned_to_id = '{current_user_id}' and Dec = 0 ORDER BY current_deadline ")  
       return  cr.fetchall()
 
@@ -188,7 +188,7 @@ try:
 
    def Filter_task_assigned_by_id(Search_V_01,current_user_id):
 
-      cr.execute(f"select * from Task_View where assigned_by_id = %s and Dec = 0 and ( title LIKE  '%' + %s + '%' or description LIKE  '%' + %s + '%' or project_name LIKE  '%' + %s + '%')  ORDER BY current_deadline ", (current_user_id, Search_V_01, Search_V_01, Search_V_01))
+      cr.execute(f"select * from Task_View where assigned_by_id = ? and Dec = 0 and ( title LIKE  '%' + ? + '%' or description LIKE  '%' + ? + '%' or project_name LIKE  '%' + ? + '%')  ORDER BY current_deadline ", (current_user_id, Search_V_01, Search_V_01, Search_V_01))
       # cr.execute(f"select * from Task_View where assigned_by_id = '{current_user_id}' and Dec = 0 and ( title LIKE  '%' + '{Search_V_01}' + '%' or description LIKE  '%' + '{Search_V_01}' + '%' or project_name LIKE  '%' + '{Search_V_01}' + '%')  ORDER BY title ")
 
       return  cr.fetchall()
@@ -201,7 +201,7 @@ try:
 
    def Overdue_Tasks (ssigned_by_id,now):    
      
-      cr.execute(f"select * from [Task_View] where assigned_by_id = %s and Dec = 0 and (current_deadline < %s or requires_leader_attention = 1) and status <> 'completed'", (ssigned_by_id, now))
+      cr.execute(f"select * from [Task_View] where assigned_by_id = ? and Dec = 0 and (current_deadline < ? or requires_leader_attention = 1) and status <> 'completed'", (ssigned_by_id, now))
       # cr.execute(f"select * from [Task_View] where assigned_by_id = '{ssigned_by_id}' and Dec = 0 and (current_deadline < '{now}' or requires_leader_attention = 1) and status <> 'completed'")
       # cr.execute(f"select * from [Task_View] where assigned_by_id = %s and Dec = 0 and (current_deadline < %s or requires_leader_attention = 1) and status <> 'completed'", (ssigned_by_id, now))
       
@@ -213,7 +213,7 @@ try:
 
    def Overdue_Tasks_Filter_Ok (ssigned_by_id):    
      
-      cr.execute(f"select * from [Task_View] where assigned_by_id = %s and Dec = 1  and status <> 'completed'", (ssigned_by_id))
+      cr.execute(f"select * from [Task_View] where assigned_by_id = ? and Dec = 1  and status <> 'completed'", (ssigned_by_id))
       # cr.execute(f"select * from [Task_View] where assigned_by_id = '{ssigned_by_id}' and Dec = 1  and status <> 'completed'", (ssigned_by_id))
       return  cr.fetchall()
    
@@ -223,7 +223,7 @@ try:
 
    def Overdue_Tasks_Member (assigned_to_id,now):    
      
-      cr.execute(f"select * from [Task_View] where assigned_to_id = %s and Dec = 0 and (current_deadline < %s or requires_leader_attention = 1) and status <> 'completed'", (assigned_to_id, now))
+      cr.execute(f"select * from [Task_View] where assigned_to_id = ? and Dec = 0 and (current_deadline < ? or requires_leader_attention = 1) and status <> 'completed'", (assigned_to_id, now))
       # cr.execute(f"select * from [Task_View] where assigned_to_id = '{assigned_to_id}' and Dec = 0 and (current_deadline < '{now}' or requires_leader_attention = 1) and status <> 'completed'", (assigned_to_id, now))
       return  cr.fetchall()
    
@@ -234,7 +234,7 @@ try:
    def Task_by_TaskId (task_id):    #user_name
      
  
-      cr.execute(f"select * from [Task_View] where task_id = %s ", (task_id,))  
+      cr.execute(f"select * from [Task_View] where task_id = ? ", (task_id,))  
       # cr.execute(f"select * from [Task_View] where task_id = '{task_id}' ")  
       return  cr.fetchone()
 
@@ -249,7 +249,7 @@ try:
 
    def Task__assigned_by_member(Filter_by_member_v ):
 
-      cr.execute(f"select * from Task_View where assigned_to_id = %s and Dec = 0  ORDER BY current_deadline ", (Filter_by_member_v))
+      cr.execute(f"select * from Task_View where assigned_to_id = ? and Dec = 0  ORDER BY current_deadline ", (Filter_by_member_v))
       return  cr.fetchall()
      
 
@@ -258,7 +258,7 @@ try:
 # # **********************************************************************************************************
 
    def user_member():   
-      cr = db.cursor(as_dict=True) 
+     
       cr.execute(f"select * from [user] where role='member'")  # where username ='{user_name}'
       return  cr.fetchall()
 
@@ -268,7 +268,7 @@ try:
 
    def  task_check_notifications (user_id):    
      
-     cr.execute(f"SELECT COUNT(task_id) AS no_task  FROM [Task_View] WHERE  (assigned_by_id = %s) and Dec = 0 and (requires_leader_attention = 1) AND (status <> 'completed')", user_id)
+     cr.execute(f"SELECT COUNT(task_id) AS no_task  FROM [Task_View] WHERE  (assigned_by_id = ?) and Dec = 0 and (requires_leader_attention = 1) AND (status <> 'completed')", user_id)
      
      return  cr.fetchone()
     
@@ -279,7 +279,7 @@ try:
 
    def  task_check_notifications_member (user_id):    
      
-     cr.execute(f"SELECT COUNT(task_id) AS no_task  FROM [Task_View] WHERE  (assigned_to_id = %s) AND (requires_leader_attention = 1) AND (status <> 'completed')", user_id)
+     cr.execute(f"SELECT COUNT(task_id) AS no_task  FROM [Task_View] WHERE  (assigned_to_id = ?) AND (requires_leader_attention = 1) AND (status <> 'completed')", user_id)
      
      return  cr.fetchone()
    
@@ -295,7 +295,7 @@ try:
             INSERT INTO [task] (
                 title, description, assigned_to_id, assigned_by_id, 
                 start_date, original_end_date, current_deadline, status, created_at,task_project_id
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, title, description, assigned_to_id, assigned_by_id, 
            start_date, original_end_date, current_deadline, status, created_at,Project_id)
      
@@ -314,7 +314,7 @@ try:
      cr.execute("""
             INSERT INTO [user] (
                 username, password, role, full_name
-            ) VALUES (%s, %s, %s, %s)
+            ) VALUES (?, ?, ?, ?)
         """, user_name, user_password, user_role, user_full_name)
      
      db.commit() 
@@ -330,11 +330,11 @@ try:
 
      cr.execute("""
             UPDATE [user] 
-            SET   username = %s, 
-                  password = %s, 
-                  role = %s, 
-                  full_name = %s 
-            WHERE user_id = %s
+            SET   username = ?, 
+                  password = ?, 
+                  role = ?, 
+                  full_name = ? 
+            WHERE user_id = ?
         """, (
             user_name, 
             user_password,  
@@ -353,7 +353,7 @@ try:
 
    def Current_Task (Task_id):    
      
-      cr.execute(f"select * from [Task_View] where task_id = %s ", (Task_id,))  
+      cr.execute(f"select * from [Task_View] where task_id = ? ", (Task_id,))  
       return  cr.fetchone()
    
 
@@ -368,10 +368,10 @@ try:
     #  cr.execute(f"UPDATE [task] SET status ='{status}', completed_at ='{completed_at}', requires_leader_attention ='{requires_leader_attention}'  where task_id = '{task_id}'")
      cr.execute("""
             UPDATE [task] 
-            SET   status = %s, 
-                  completed_at = %s, 
-                  requires_leader_attention = %s 
-            WHERE task_id = %s
+            SET   status = ?, 
+                  completed_at = ?, 
+                  requires_leader_attention = ? 
+            WHERE task_id = ?
         """, (
             status, 
             completed_at,  
@@ -395,9 +395,9 @@ try:
     
      cr.execute("""
             UPDATE [task] 
-            SET   current_deadline = %s, 
-                  requires_leader_attention = %s
-            WHERE task_id = %s
+            SET   current_deadline = ?, 
+                  requires_leader_attention = ?
+            WHERE task_id = ?
         """, (
             new_deadline, 
             requires_leader_attention,
@@ -420,11 +420,11 @@ try:
      
      cr.execute("""
             UPDATE [task] 
-            SET   status = %s, 
-                  reason_for_delay = %s, 
-                  current_deadline = %s,
-                  requires_leader_attention = %s
-            WHERE task_id = %s
+            SET   status = ?, 
+                  reason_for_delay = ?, 
+                  current_deadline = ?,
+                  requires_leader_attention = ?
+            WHERE task_id = ?
         """, (
             status, 
             reason_for_delay,
@@ -449,7 +449,7 @@ try:
      cr.execute("""
             UPDATE [task] 
             SET   Dec = 1 
-            WHERE task_id = %s
+            WHERE task_id = ?
         """, (
             task_id
         ))
@@ -462,23 +462,23 @@ try:
 # ********************************  Updata task  Data                      *********************************
 # **********************************************************************************************************
 
-  
+ 
    def Edit_Task(task_id, task_title, task_description, task_assigned_to_id, task_start_date, task_end_date, task_original_end_date, task_completed_at, task_reason_for_delay,task_status,task_Dec,task_project):
 
      cr.execute("""
             UPDATE [task] 
-            SET   title = %s, 
-                  description = %s, 
-                  assigned_to_id = %s, 
-                  start_date = %s, 
-                  original_end_date = %s, 
-                  current_deadline = %s, 
-                  completed_at = %s, 
-                  reason_for_delay = %s,
-                  status = %s,
-                  Dec = %s,
-                  task_project_id = %s
-            WHERE task_id = %s
+            SET   title = ?, 
+                  description = ?, 
+                  assigned_to_id = ?, 
+                  start_date = ?, 
+                  original_end_date = ?, 
+                  current_deadline = ?, 
+                  completed_at = ?, 
+                  reason_for_delay = ?,
+                  status = ?,
+                  Dec = ?,
+                  task_project_id = ?
+            WHERE task_id = ?
         """, (
             task_title,
             task_description,
@@ -504,7 +504,7 @@ try:
 # **********************************************************************************************************
 
    def project_table():    
-      cr = db.cursor(as_dict=True)
+     
       cr.execute(f"select project_id, project_name, project_group  from [Project_Table]")  
       return  cr.fetchall()
 
@@ -514,7 +514,7 @@ try:
 
    def project_table_id(project_id):    
      
-      cr.execute(f"select project_id, project_name, project_group  from [Project_Table] where project_id = %s", (project_id,))
+      cr.execute(f"select project_id, project_name, project_group  from [Project_Table] where project_id = ?", (project_id,))
       return  cr.fetchone()
 # **********************************************************************************************************
 # ********************************  Delete Project   *******************************************************
@@ -522,7 +522,7 @@ try:
 
    def Delete_Project(project_id):
       
-      cr.execute(f"delete from [Project_Table] where project_id = %s", (project_id,))
+      cr.execute(f"delete from [Project_Table] where project_id = ?", (project_id,))
       db.commit()
 
 # **********************************************************************************************************
@@ -531,7 +531,7 @@ try:
 
    def Add_Project(project_name, project_group):
       
-      cr.execute(f"INSERT INTO [Project_Table] (project_name, project_group) VALUES (%s, %s)", (project_name, project_group))
+      cr.execute(f"INSERT INTO [Project_Table] (project_name, project_group) VALUES (?, ?)", (project_name, project_group))
       db.commit()
 
 
@@ -544,9 +544,9 @@ try:
 
      cr.execute("""
             UPDATE [Project_Table] 
-            SET   project_name = %s, 
-                  project_group = %s 
-            WHERE project_id = %s
+            SET   project_name = ?, 
+                  project_group = ? 
+            WHERE project_id = ?
         """, (
             project_name, 
             project_group,  

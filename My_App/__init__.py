@@ -59,6 +59,8 @@ class User(UserMixin):
         self.role = user_tuple[3]
         self.full_name =user_tuple[4]
         
+       
+
 
     @property
     def is_active(self):
@@ -156,9 +158,9 @@ def logout():
 @login_required
 def dashboard():
     # return render_template('Test.html')
-      now = datetime.utcnow()
+    #   now = datetime.utcnow()
 
-    #   now = datetime.now()
+      now = datetime.now()
 
       if current_user.role == 'leader':
         # Get all tasks created by this leader
