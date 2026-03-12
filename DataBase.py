@@ -6,10 +6,17 @@ import json
 import pyodbc
 
 # Define your connection parameters
+<<<<<<< HEAD
 # server = 'MERZ\MYDATABASE'  # e.g., 'localhost' or '41.38.197.252' 'DESKTOP-LMBLE4G\MERZOSQLEXPRESS'
 # database = 'Task_App'
 # username = 'merzo'    # Use None if using Windows Authentication
 # password = 'merzo1976'     # Use None if using Windows Authentication
+=======
+server = '41.38.197.252'  # e.g., 'localhost' or '41.38.197.252' 'DESKTOP-LMBLE4G\MERZOSQLEXPRESS'
+database = 'Task_App'
+username = 'merzo'    # Use None if using Windows Authentication
+password = 'merzo1976'     # Use None if using Windows Authentication
+>>>>>>> c3b074e4226dfe383c35f71247908484a322f0ec
 
 # Create the connection string
 # connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
