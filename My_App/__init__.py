@@ -160,7 +160,7 @@ def dashboard():
     # return render_template('Test.html')
     #   now = datetime.utcnow()
 
-      now = datetime.now()
+      now = datetime.now().replace(microsecond=0)
 
       if current_user.role == 'leader':
         # Get all tasks created by this leader
@@ -218,7 +218,7 @@ def assign_task():
         
 
         from DataBase import ADD_Task
-        ADD_Task(title, description, assigned_to_id,assigned_by_id, start_date, original_end_date, current_deadline, status, datetime.utcnow(),Project_id)
+        ADD_Task(title, description, assigned_to_id,assigned_by_id, start_date, original_end_date, current_deadline, status, datetime.now().replace(microsecond=0),Project_id)
 
         
         flash(f'Task "{title}" assigned successfully!', 'success')
@@ -319,8 +319,8 @@ def delete_user():
 def Filter_Data_ByMember():
 
    Filter_by_member_v = request.args.get('TT')
-   now = datetime.utcnow()
-      
+#    now = datetime.utcnow()
+   now = datetime.now().replace(microsecond=0)    
       
         # Get all tasks created by this leader
    from DataBase import Task__assigned_by_member
@@ -348,8 +348,8 @@ def Search_Fun():
 
    
    
-   now = datetime.utcnow()
-      
+#    now = datetime.utcnow()
+   now = datetime.now().replace(microsecond=0)   
    if current_user.role == 'leader':
         
           from DataBase import Filter_task_assigned_by_id
@@ -474,7 +474,7 @@ def DecTask(task_id, status):
 def Filter_Ok_Task():
 
 
-   now = datetime.utcnow()
+   now = datetime.now().replace(microsecond=0)
       
    if current_user.role == 'leader':
         # Get all tasks created by this leader
@@ -533,7 +533,7 @@ def Team_management():
       return render_template('Team.html', users=users)
 
 
-
+# ****************************************************************************************************************
 # ****************************************************************************************************************
 
 @app.route('/task/<int:task_id>/update', methods=['POST'])
@@ -546,12 +546,12 @@ def update_task(task_id):
     task = Current_Task(task_id)
     
     # Verify this task belongs to the current member
-    if task[3] != current_user.id:
+    if task['assigned_to_id'] != current_user.id:
         flash('Unauthorized access', 'danger')
         return redirect(url_for('dashboard'))
     
     # Verify task isn't already completed
-    if task[8] == 'completed':
+    if task['status'] == 'completed':
         flash('This task is already completed', 'warning')
         return redirect(url_for('dashboard'))
     
@@ -561,7 +561,7 @@ def update_task(task_id):
     if action == 'complete':
         
         status = 'completed'
-        completed_at = datetime.utcnow()
+        completed_at = datetime.now().replace(microsecond=0)
         requires_leader_attention = False
         
         from DataBase import update_Task_status
@@ -574,7 +574,7 @@ def update_task(task_id):
         new_deadline = datetime.strptime(new_deadline_str, '%Y-%m-%dT%H:%M')
         
         # Validate new deadline
-        if new_deadline <= datetime.utcnow():
+        if new_deadline <= datetime.now().replace(microsecond=0):
             flash('New deadline must be in the future', 'danger')
             return redirect(url_for('dashboard'))
         
@@ -592,6 +592,8 @@ def update_task(task_id):
     
     return redirect(url_for('dashboard'))
 
+# ****************************************************************************************************************
+# ****************************************************************************************************************
 
 
 
@@ -602,18 +604,19 @@ def resolve_task(task_id):
 
     from DataBase import Current_Task
     task = Current_Task(task_id)
-
+   
     # task = Task.query.get_or_404(task_id)
     
     # Verify this task was created by the current leader
-    if task[4] != current_user.id:
+    if task['assigned_by_id'] != current_user.id:
         return jsonify({'success': False, 'message': 'Unauthorized access'}), 403
     
     action = request.form['action']
     
     if action == 'complete':
         status = 'completed'
-        completed_at = datetime.utcnow()
+        completed_at = datetime.now().replace(microsecond=0)
+        
         requires_leader_attention = False
         
         from DataBase import update_Task_status
@@ -623,7 +626,7 @@ def resolve_task(task_id):
         new_deadline_str = request.form['new_deadline']
         new_deadline = datetime.strptime(new_deadline_str, '%Y-%m-%dT%H:%M')
         
-        if new_deadline <= datetime.utcnow():
+        if new_deadline <= datetime.now().replace(microsecond=0):
             return jsonify({'success': False, 'message': 'New deadline must be in the future'}), 400
         
         from DataBase import update_Task_status_postpone
@@ -636,40 +639,44 @@ def resolve_task(task_id):
     return jsonify({'success': True})
 
 
+# ****************************************************************************************************************
+# ****************************************************************************************************************
 
 @app.route('/api/overdue-tasks')
 @login_required
 # @leader_required
 def get_overdue_tasks():
 
-    now = datetime.utcnow()
+    now = datetime.now().replace(microsecond=0)
 
     if current_user.role == 'leader' :
          from DataBase import Overdue_Tasks
          overdue_tasks = Overdue_Tasks(current_user.id, now)
+         
 
     elif current_user.role == 'member' :
          from DataBase import Overdue_Tasks_Member
          overdue_tasks = Overdue_Tasks_Member(current_user.id, now)
 
-
-
     tasks_data = [{
-        'id': task[0],  #id
-        'title': task[1],
-        'assigned_to': task[14],
-        'current_deadline': task[7].isoformat(),
-        'original_deadline': task[6].isoformat(),
-        'reason_for_delay': task[10],
-        'description': task[2],
-        'projectname': task[16],
-        'status': task[8]
-    } for task in overdue_tasks]
+    'id': task['task_id'],  # ← Use brackets instead of dot notation
+    'title': task['title'],
+    'assigned_to': task['assigned_to_fullname'],
+    'current_deadline': task['current_deadline'].isoformat(),
+    'original_deadline': task['original_end_date'].isoformat(),
+    'reason_for_delay': task['reason_for_delay'],
+    'description': task['description'],
+    'projectname': task['project_name'],
+    'status': task['status']
+     } for task in overdue_tasks]
+   
+
     
-    
+
     return jsonify(tasks_data)
 
-
+# ****************************************************************************************************************
+# ****************************************************************************************************************
 
 @app.route('/api/check-notifications')
 @login_required

@@ -15,12 +15,12 @@
 
       <div class="row mb-3">
 
-        <input type="hidden" name="task_id" value="{{ tasks[0] }}">
+        <input type="hidden" name="task_id" value="{{ tasks.task_id }}">
 
         <div class="col-md-6">
           <label for="title" class="form-label fw-bold">Task Title <span class="text-danger">*</span></label>
           <input type="text" class="form-control" id="title" name="title"
-            placeholder="e.g., Implement user authentication" required value="{{ tasks[1] }}">
+            placeholder="e.g., Implement user authentication" required value="{{ tasks.title }}">
         </div>
 
         <div class="col-md-6">
@@ -29,7 +29,7 @@
             <option value="">Select team member</option>
             {% for member in members %}
             <!-- <option value="{{ member.user_id }}"> {{ member.full_name }} ({{ member.username }})</option> -->
-            <option value="{{ member.user_id }}" {% if member.user_id==tasks[3] %} selected {% endif %}>{{
+            <option value="{{ member.user_id }}" {% if member.user_id==tasks.assigned_to_id %} selected {% endif %}>{{
               member.full_name }} ({{ member.username }})</option>
             {% endfor %}
           </select>
@@ -39,7 +39,7 @@
       <div class="mb-3">
         <label for="description" class="form-label fw-bold">Description</label>
         <textarea class="form-control" id="description" name="description" rows="4"
-          placeholder="Provide detailed instructions, requirements, and expectations for this task...">{{ tasks[2] }}</textarea>
+          placeholder="Provide detailed instructions, requirements, and expectations for this task...">{{ tasks.description }}</textarea>
       </div>
 
       <div class="row mb-4">
@@ -47,14 +47,14 @@
         <div class="col-md-6">
           <label for="start_date" class="form-label fw-bold">Start Date <span class="text-danger">*</span></label>
           <input type="datetime-local" class="form-control" id="start_date" name="start_date" required
-            value="{{ tasks[5]|replace(' ', 'T') }}">
+            value="{{ tasks.start_date|replace(' ', 'T') }}">
         </div>
 
         <div class="col-md-6">
           <label for="end_date" class="form-label fw-bold">End Date (Deadline) <span
               class="text-danger">*</span></label>
           <input type="datetime-local" class="form-control" id="end_date" name="end_date" required
-            value="{{ tasks[7]|replace(' ', 'T') }}">
+            value="{{ tasks.current_deadline|replace(' ', 'T') }}">
         </div>
 
       </div>
@@ -65,13 +65,13 @@
           <label for="original_end_date" class="form-label fw-bold">Original End Date <span
               class="text-danger">*</span></label>
           <input type="datetime-local" class="form-control" id="original_end_date" name="original_end_date" required
-            value="{{ tasks[6]|replace(' ', 'T') }}">
+            value="{{ tasks.original_end_date|replace(' ', 'T') }}">
         </div>
 
         <div class="col-md-6">
           <label for="completed_at" class="form-label fw-bold">completed_at </label>
           <input type="datetime-local" class="form-control" id="completed_at" name="completed_at"
-            value="{{ tasks[10]|replace(' ', 'T') }}">
+            value="{{ tasks.completed_at|replace(' ', 'T') }}">
         </div>
 
       </div>
@@ -79,7 +79,7 @@
       <div class="mb-3">
         <label for="reason_for_delay" class="form-label fw-bold">Reason for delay</label>
         <textarea class="form-control" id="reason_for_delay" name="reason_for_delay" rows="4"
-          placeholder="Provide detailed instructions, requirements, and expectations for this task...">{{ tasks[9] }}</textarea>
+          placeholder="Provide detailed instructions, requirements, and expectations for this task...">{{ tasks.reason_for_delay }}</textarea>
       </div>
 
 
@@ -89,9 +89,9 @@
           <label for="status" class="form-label fw-bold">Status <span class="text-danger">*</span></label>
           <select class="form-select" id="status" name="status" required>
             <option value="">Select status</option>
-            <option value="pending" {% if tasks[8]=="pending" %} selected {% endif %}>pending</option>
-            <option value="delayed" {% if tasks[8]=="delayed" %} selected {% endif %}>delayed</option>
-            <option value="completed" {% if tasks[8]=="completed" %} selected {% endif %}>completed</option>
+            <option value="pending" {% if tasks.status=="pending" %} selected {% endif %}>pending</option>
+            <option value="delayed" {% if tasks.status=="delayed" %} selected {% endif %}>delayed</option>
+            <option value="completed" {% if tasks.status=="completed" %} selected {% endif %}>completed</option>
           </select>
         </div>
 
@@ -122,11 +122,7 @@
 
   </div>
 
-
-
-
 </div>
-
 
 
 <div class="d-grid d-md-flex justify-content-md-end gap-2">

@@ -2,8 +2,8 @@
 # import pypyodbc
 # import pyodbc
 import pymssql
-import json
-import pyodbc
+# import json
+# import pyodbc
 
 # Define your connection parameters
 # server = 'MERZ\MYDATABASE'  # e.g., 'localhost' or '41.38.197.252' 'DESKTOP-LMBLE4G\MERZOSQLEXPRESS'
@@ -24,16 +24,15 @@ try:
 
     # **********************************************************************************************************
     # **********************pymssql*************************
-   server=r'41.38.197.252'  #41.38.197.252  MERZ\\MYDATABASE
+   server=r'41.38.197.252:50067'  #41.38.197.252  MERZ\\MYDATABASE MERZ\PRIMAVERASQL  41.38.197.252,50067
    db = pymssql.connect(
    server=server,
    user='merzo',
    password='merzo1976',
-   database='Task_App',
-   charset='cp1256'    # ← Correct for pymssql
-               
+   database='Task_App'
+        
      )
-
+# charset='cp1256'    # ← Correct for pymssql
    print("Connection successful!")
    
    cr = db.cursor()
@@ -97,7 +96,8 @@ try:
 # **********************************************************************************************************
 
    def all_user():    
-     
+
+      cr = db.cursor(as_dict=True)
       cr.execute(f"select user_id, username, password, role, full_name from [user]")  
       return  cr.fetchall()
 
@@ -147,7 +147,7 @@ try:
    def Task__assigned_by_CurrentUser_Filter_Ok (current_user_id):    #user_name
      
 
-      
+      cr = db.cursor(as_dict=True)
       cr.execute(f"select * from [Task_View] where assigned_by_id ='{current_user_id}' and Dec = 1 ORDER BY current_deadline ")  
       return  cr.fetchall()
    
@@ -187,7 +187,7 @@ try:
 
 
    def Filter_task_assigned_by_id(Search_V_01,current_user_id):
-
+      cr = db.cursor(as_dict=True)
       cr.execute(f"select * from Task_View where assigned_by_id = %s and Dec = 0 and ( title LIKE  '%' + %s + '%' or description LIKE  '%' + %s + '%' or project_name LIKE  '%' + %s + '%')  ORDER BY current_deadline ", (current_user_id, Search_V_01, Search_V_01, Search_V_01))
       # cr.execute(f"select * from Task_View where assigned_by_id = '{current_user_id}' and Dec = 0 and ( title LIKE  '%' + '{Search_V_01}' + '%' or description LIKE  '%' + '{Search_V_01}' + '%' or project_name LIKE  '%' + '{Search_V_01}' + '%')  ORDER BY title ")
 
@@ -200,21 +200,9 @@ try:
 # # **********************************************************************************************************
 
    def Overdue_Tasks (ssigned_by_id,now):    
-     
+      cr = db.cursor(as_dict=True)
       cr.execute(f"select * from [Task_View] where assigned_by_id = %s and Dec = 0 and (current_deadline < %s or requires_leader_attention = 1) and status <> 'completed'", (ssigned_by_id, now))
-      # cr.execute(f"select * from [Task_View] where assigned_by_id = '{ssigned_by_id}' and Dec = 0 and (current_deadline < '{now}' or requires_leader_attention = 1) and status <> 'completed'")
-      # cr.execute(f"select * from [Task_View] where assigned_by_id = %s and Dec = 0 and (current_deadline < %s or requires_leader_attention = 1) and status <> 'completed'", (ssigned_by_id, now))
-      
-      return  cr.fetchall()
-
-# # **********************************************************************************************************
-# # ********************************  Task  overdue_tasks  FOR LEADER  for Dec 1      ********************************************
-# # **********************************************************************************************************
-
-   def Overdue_Tasks_Filter_Ok (ssigned_by_id):    
      
-      cr.execute(f"select * from [Task_View] where assigned_by_id = %s and Dec = 1  and status <> 'completed'", (ssigned_by_id))
-      # cr.execute(f"select * from [Task_View] where assigned_by_id = '{ssigned_by_id}' and Dec = 1  and status <> 'completed'", (ssigned_by_id))
       return  cr.fetchall()
    
 # # **********************************************************************************************************
@@ -222,11 +210,24 @@ try:
 # # **********************************************************************************************************
 
    def Overdue_Tasks_Member (assigned_to_id,now):    
-     
+      cr = db.cursor(as_dict=True)
       cr.execute(f"select * from [Task_View] where assigned_to_id = %s and Dec = 0 and (current_deadline < %s or requires_leader_attention = 1) and status <> 'completed'", (assigned_to_id, now))
       # cr.execute(f"select * from [Task_View] where assigned_to_id = '{assigned_to_id}' and Dec = 0 and (current_deadline < '{now}' or requires_leader_attention = 1) and status <> 'completed'", (assigned_to_id, now))
       return  cr.fetchall()
    
+# # **********************************************************************************************************
+# # ********************************  Task  overdue_tasks  FOR LEADER  for Dec 1      ********************************************
+# # **********************************************************************************************************
+
+   def Overdue_Tasks_Filter_Ok (ssigned_by_id):    
+
+      cr = db.cursor(as_dict=True)
+
+      cr.execute(f"select * from [Task_View] where assigned_by_id = %s and Dec = 1  and status <> 'completed'", (ssigned_by_id))
+     
+      return  cr.fetchall()
+   
+
 # # **********************************************************************************************************
 # # ********************************  Task filter by task_Id  ********************************************
 # # **********************************************************************************************************
@@ -248,7 +249,7 @@ try:
 
 
    def Task__assigned_by_member(Filter_by_member_v ):
-
+      cr = db.cursor(as_dict=True) 
       cr.execute(f"select * from Task_View where assigned_to_id = %s and Dec = 0  ORDER BY current_deadline ", (Filter_by_member_v))
       return  cr.fetchall()
      
@@ -266,8 +267,9 @@ try:
 # ********************************   task check_notifications  leader         ***************************************
 # **********************************************************************************************************
 
-   def  task_check_notifications (user_id):    
-     
+   def  task_check_notifications (user_id):   
+      
+     cr = db.cursor(as_dict=True)  
      cr.execute(f"SELECT COUNT(task_id) AS no_task  FROM [Task_View] WHERE  (assigned_by_id = %s) and Dec = 0 and (requires_leader_attention = 1) AND (status <> 'completed')", user_id)
      
      return  cr.fetchone()
@@ -278,7 +280,7 @@ try:
 # **********************************************************************************************************
 
    def  task_check_notifications_member (user_id):    
-     
+     cr = db.cursor(as_dict=True) 
      cr.execute(f"SELECT COUNT(task_id) AS no_task  FROM [Task_View] WHERE  (assigned_to_id = %s) AND (requires_leader_attention = 1) AND (status <> 'completed')", user_id)
      
      return  cr.fetchone()
@@ -296,8 +298,8 @@ try:
                 title, description, assigned_to_id, assigned_by_id, 
                 start_date, original_end_date, current_deadline, status, created_at,task_project_id
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, title, description, assigned_to_id, assigned_by_id, 
-           start_date, original_end_date, current_deadline, status, created_at,Project_id)
+        """, (title, description, assigned_to_id, assigned_by_id, 
+           start_date, original_end_date, current_deadline, status, created_at,Project_id))
      
      db.commit() 
        
@@ -315,7 +317,7 @@ try:
             INSERT INTO [user] (
                 username, password, role, full_name
             ) VALUES (%s, %s, %s, %s)
-        """, user_name, user_password, user_role, user_full_name)
+        """, (user_name, user_password, user_role, user_full_name))
      
      db.commit() 
        
@@ -352,8 +354,8 @@ try:
 # # **********************************************************************************************************
 
    def Current_Task (Task_id):    
-     
-      cr.execute(f"select * from [Task_View] where task_id = %s ", (Task_id,))  
+      cr = db.cursor(as_dict=True) 
+      cr.execute(f"select * from [Task_View] where task_id = %s ", (Task_id))  
       return  cr.fetchone()
    
 
@@ -513,7 +515,7 @@ try:
 # **********************************************************************************************************
 
    def project_table_id(project_id):    
-     
+      cr = db.cursor(as_dict=True)
       cr.execute(f"select project_id, project_name, project_group  from [Project_Table] where project_id = %s", (project_id,))
       return  cr.fetchone()
 # **********************************************************************************************************
