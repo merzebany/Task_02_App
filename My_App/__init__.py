@@ -13,7 +13,8 @@ import os
 
 # app = Flask(__name__)
 app = Flask(__name__,template_folder='templates',static_folder='static',static_url_path='/My_App')
-app.config['SECRET_KEY'] = os.urandom(24)
+# app.config['SECRET_KEY'] = os.urandom(24)
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-change-in-production')
 app.config['JSON_AS_ASCII'] = False
 
 login_manager = LoginManager(app)
