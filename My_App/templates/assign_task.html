@@ -119,4 +119,22 @@
 
 
 </script>
+
+
+
+<script>
+
+  // يستخدم لعل سيرش تلقائ في الكومبو بوكس 
+
+  document.addEventListener('DOMContentLoaded', function () {
+    new TomSelect("#Project_assigned", {
+      placeholder: 'اختار اسم المشروع .....',
+      searchField: ['text'],
+      create: false,
+      dropdownParent: 'body',
+      maxOptions: 1000
+    });
+  });
+</script>
+
 {% endblock %}

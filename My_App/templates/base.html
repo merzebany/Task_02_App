@@ -14,12 +14,18 @@
   <style></style>
 
   <script></script>
+
+  <!-- CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet" />
+
+  <!-- JS -->
+  <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
+  <nav class="navbar navbar-expand-lg navbar-success bg-white sticky-top">
     <div class="container-fluid">
-      <a class="navbar-brand fw-bold text-primary" href="{{ url_for('dashboard') }}">
+      <a class="navbar-brand fw-bold " href="{{ url_for('dashboard') }}">
         <i class="bi bi-check2-square me-2"></i>TaskFlow
       </a>
 
@@ -61,7 +67,7 @@
     </div>
   </nav>
 
-  <div class="container-fluid">
+  <div class="container-fluid fw-bold ">
     <div class="row">
       <!-- Sidebar for larger screens -->
       <div class="col-lg-2 col-md-3 sidebar d-none d-md-block">
@@ -220,16 +226,17 @@
             const notification = document.createElement("div");
             notification.className = "windows-notification";
             notification.innerHTML = `
-                                <div class="icon">
-                                    <i class="bi bi-exclamation-triangle"></i>
-                                </div>
-                                <div style="text-align: right;">
-                                    <h5>Overdue Task:</h5>
-                                    <p><strong>${task.title}</strong></p>
-                                    <p><strong>${task.description}</strong></p>
-                                    <p>Assigned to: ${task.assigned_to}<br>Deadline passed: ${formatDate(task.current_deadline)}</p>
-                                </div>
-                            `;
+                                  <div class="icon">
+                                      <i class="bi bi-exclamation-triangle"></i>
+                                  </div>
+                                  <div style="text-align: right;">
+                                      <h5>:  نشاط متاخر </h5>
+                                      <p><strong>${task.title}</strong></p>
+                                      <p><strong>${task.description}</strong></p>
+                                      <p><strong>${task.projectname}</strong></p>
+                                      <p>المسؤول  : ${task.assigned_to}<br>Deadline passed: ${formatDate(task.current_deadline)}</p>
+                                  </div>
+                              `;
 
             // Add click event to go to dashboard
             notification.addEventListener("click", function () {
@@ -254,7 +261,7 @@
                   body: RTL + `${cleanText(task.title)}\n ${task.description}\n ${task.projectname}\n  ${task.assigned_to}\n `,
                   icon: "{{ url_for('static', filename='images/tabarak.png') }}",
                   badge: "{{ url_for('static', filename='images/tabarak.png') }}",
-                  dir: "ltr"
+                  dir: "rtl"
                 });
 
                 notifiedTasks.push(task.task_id);

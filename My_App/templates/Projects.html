@@ -14,6 +14,23 @@
 
 <div class="card">
 
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span>Project List</span>
+
+    <form class="d-flex" role="search">
+      <input class="form-control me-2 Search_But" type="search" placeholder="Search" aria-label="Search">
+      <button class="btn btn-sm btn-outline-secondary Search_But" data-bs-toggle="tooltip" data-bs-placement="top"
+        data-bs-title="Search Tasks" id="SearchBut" type="button" onclick="Search_Project_Fun()"><i
+          class="bi bi-search"></i>
+      </button>
+    </form>
+
+
+
+  </div>
+
+
+
   <div class="card-body p-0">
     <div class="table-responsive">
 
@@ -107,6 +124,32 @@
     let New_Del_Atr_2 = document.getElementById("project_name_to_delete");
     New_Del_Atr_2.value = Del_Atr_V;
   }
+
+
+
+  //******************************** Add event listener to the entire document  **********************
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Enter') {
+      event.preventDefault(); // Prevent default behavior
+      document.getElementById('SearchBut').click(); // Trigger the button click
+    }
+  });
+
+
+  //******************************** Search  document  **********************
+  function Search_Project_Fun() {
+
+    let Search_V = document.querySelector(".Search_But").value.trim()
+    if (Search_V == "") {
+      window.location.href = "/Projects"
+    } else {
+      window.location.href = "/Search_Data_project?search_v=" + Search_V
+    }
+  }
+
+
+
 </script>
 
 

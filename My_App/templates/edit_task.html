@@ -36,7 +36,7 @@
         </div>
       </div>
 
-      <div class="mb-3">
+      <div class="row mb-3">
         <label for="description" class="form-label fw-bold">Description</label>
         <textarea class="form-control" id="description" name="description" rows="4"
           placeholder="Provide detailed instructions, requirements, and expectations for this task...">{{ tasks.description }}</textarea>
@@ -76,7 +76,7 @@
 
       </div>
 
-      <div class="mb-3">
+      <div class="row mb-3">
         <label for="reason_for_delay" class="form-label fw-bold">Reason for delay</label>
         <textarea class="form-control" id="reason_for_delay" name="reason_for_delay" rows="4"
           placeholder="Provide detailed instructions, requirements, and expectations for this task...">{{ tasks.reason_for_delay }}</textarea>
@@ -105,9 +105,13 @@
           </select>
 
         </div>
+      </div>
 
+
+      <div class="row mb-4">
 
         <div class="col-md-6">
+
           <label for="project" class="form-label fw-bold">Assign Project</label>
           <select class="form-select" id="project" name="project">
             <option value="">Select project</option>
@@ -118,29 +122,32 @@
             {% endfor %}
           </select>
         </div>
+
       </div>
 
+
+
+
+
+
+
+      <div class="d-grid d-md-flex justify-content-md-end gap-2">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancel</a>
+
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-check-circle me-1"></i> Edit Task
+        </button>
+      </div>
+    </form>
   </div>
-
-</div>
-
-
-<div class="d-grid d-md-flex justify-content-md-end gap-2">
-  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancel</a>
-
-  <button type="submit" class="btn btn-primary">
-    <i class="bi bi-check-circle me-1"></i> Edit Task
-  </button>
-</div>
-</form>
-</div>
 </div>
 
 {% endblock %}
 
 {% block scripts %}
-<!-- <script>
-  // Set default dates (today for start, 3 days from now for end)
+
+<script>
+  //  Set default dates (today for start, 3 days from now for end)
   document.addEventListener('DOMContentLoaded', function () {
     const now = new Date();
     const startDateInput = document.getElementById('start_date');
@@ -169,5 +176,20 @@
       }
     });
   });
-</script> -->
+</script>
+
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    new TomSelect("#project", {
+      placeholder: 'Search project...',
+      searchField: ['text'],
+      create: false,
+      dropdownParent: 'body',
+      maxOptions: 1000
+    });
+  });
+</script>
+
 {% endblock %}

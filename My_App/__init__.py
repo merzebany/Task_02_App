@@ -21,31 +21,6 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
 # Models
-# class User(UserMixin, db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     username = db.Column(db.String(80), unique=True, nullable=False)
-#     password = db.Column(db.String(120), nullable=False)  # In production, use proper hashing
-#     role = db.Column(db.String(20), nullable=False)  # 'leader' or 'member'
-#     full_name = db.Column(db.String(100), nullable=False)
-    
-#     # Relationships
-#     assigned_tasks = db.relationship('Task', foreign_keys='Task.assigned_to_id', backref='assigned_member', lazy=True)
-#     created_tasks = db.relationship('Task', foreign_keys='Task.assigned_by_id', backref='assigned_leader', lazy=True)
-
-# class Task(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     title = db.Column(db.String(120), nullable=False)
-#     description = db.Column(db.Text)
-#     assigned_to_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-#     assigned_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-#     start_date = db.Column(db.DateTime, nullable=False)
-#     original_end_date = db.Column(db.DateTime, nullable=False)
-#     current_deadline = db.Column(db.DateTime, nullable=False)
-#     status = db.Column(db.String(20), default='pending')  # pending, completed, delayed
-#     reason_for_delay = db.Column(db.Text)
-#     completed_at = db.Column(db.DateTime)
-#     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-#     requires_leader_attention = db.Column(db.Boolean, default=False)  # For persistent notifications
 
 class User(UserMixin):
  
@@ -115,6 +90,12 @@ def member_required(f):
     return decorated_function
 
 # Routes
+
+
+#**************************************************************************************************************
+#*******************************     login   -   logout            ********************************************
+#**************************************************************************************************************
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -226,6 +207,98 @@ def assign_task():
         return redirect(url_for('dashboard'))
     
       return render_template('assign_task.html', members=members , projects = projects)
+
+
+
+
+# ****************************************************************************************************************
+# ****************************     edit task     ***************************************************************
+# ****************************************************************************************************************
+
+
+@app.route('/EditTask', methods=['GET', 'POST'])
+@login_required
+@leader_required
+def EditTask():
+  
+  task_id = request.args.get('EE')
+  
+
+
+
+  from DataBase import Current_Task
+  tasks = Current_Task(task_id) 
+  
+  from DataBase import user_member
+  members = user_member()
+ 
+  from DataBase import project_table
+  projects = project_table()
+  
+
+  if request.method == 'POST':
+        
+        task_id_v = request.form['task_id']
+        task_title = request.form['title']
+        task_description = request.form['description']
+        task_assigned_to_id = request.form['assigned_to']
+        task_start_date = datetime.strptime(request.form['start_date'], '%Y-%m-%dT%H:%M')
+        task_end_date = datetime.strptime(request.form['end_date'], '%Y-%m-%dT%H:%M')
+        task_original_end_date= datetime.strptime(request.form['original_end_date'], '%Y-%m-%dT%H:%M')
+        task_completed_at = request.form['completed_at']
+        if task_completed_at:
+            task_completed_at = datetime.strptime(request.form['completed_at'], '%Y-%m-%dT%H:%M')
+        else:
+            task_completed_at = None
+        task_reson_for_delay = request.form['reason_for_delay']
+        task_stuts = request.form['status']
+        task_Dec = request.form ['Dec']  
+        task_project = request.form['project']
+        
+        if task_project:
+            task_project = request.form['project']
+        else:
+            task_project = None
+
+        from DataBase import Edit_Task
+        Edit_Task(task_id_v,task_title, task_description, task_assigned_to_id, task_start_date, task_end_date, task_original_end_date, task_completed_at, task_reson_for_delay,task_stuts,task_Dec,task_project)
+  
+        # Validate dates
+        if task_end_date <= task_start_date:
+            flash('End date must be after start date', 'danger')
+
+        flash(f'Task "{task_title}" edited successfully!', 'success')
+        return redirect(url_for('dashboard'))
+  
+
+  return render_template('edit_task.html', tasks=tasks ,members=members ,projects=projects)
+# ****************************************************************************************************************
+
+
+# ****************************************************************************************************************
+# ****************************     delete task     ***************************************************************
+# ****************************************************************************************************************
+
+
+@app.route('/delete_task', methods = ['POST'])
+
+@login_required
+@leader_required
+
+def delete_task():
+ 
+  task_ID_01 = request.form.get('task_id')
+  task_title = request.form.get('task_title')
+  
+  from DataBase import Delete_task
+  Delete_task (task_ID_01)
+
+  flash(f'Task "{task_title}" deleted successfully!', 'success')
+
+  return redirect(url_for('dashboard'))
+
+# ****************************************************************************************************************
+
 
 # ****************************************************************************************************************
 # ****************************     Add User     ******************************************************************
@@ -372,71 +445,6 @@ def Search_Fun():
    
    
 # ****************************************************************************************************************
-# ****************************     edit task     ***************************************************************
-# ****************************************************************************************************************
-
-
-@app.route('/EditTask', methods=['GET', 'POST'])
-@login_required
-@leader_required
-def EditTask():
-  
-  task_id = request.args.get('EE')
-  
-
-
-
-  from DataBase import Current_Task
-  tasks = Current_Task(task_id) 
-  
-  from DataBase import user_member
-  members = user_member()
- 
-  from DataBase import project_table
-  projects = project_table()
-  
-
-  if request.method == 'POST':
-        
-        task_id_v = request.form['task_id']
-        task_title = request.form['title']
-        task_description = request.form['description']
-        task_assigned_to_id = request.form['assigned_to']
-        task_start_date = datetime.strptime(request.form['start_date'], '%Y-%m-%dT%H:%M')
-        task_end_date = datetime.strptime(request.form['end_date'], '%Y-%m-%dT%H:%M')
-        task_original_end_date= datetime.strptime(request.form['original_end_date'], '%Y-%m-%dT%H:%M')
-        task_completed_at = request.form['completed_at']
-        if task_completed_at:
-            task_completed_at = datetime.strptime(request.form['completed_at'], '%Y-%m-%dT%H:%M')
-        else:
-            task_completed_at = None
-        task_reson_for_delay = request.form['reason_for_delay']
-        task_stuts = request.form['status']
-        task_Dec = request.form ['Dec']  
-        task_project = request.form['project']
-        
-        if task_project:
-            task_project = request.form['project']
-        else:
-            task_project = None
-
-        from DataBase import Edit_Task
-        Edit_Task(task_id_v,task_title, task_description, task_assigned_to_id, task_start_date, task_end_date, task_original_end_date, task_completed_at, task_reson_for_delay,task_stuts,task_Dec,task_project)
-  
-        # Validate dates
-        if task_end_date <= task_start_date:
-            flash('End date must be after start date', 'danger')
-
-        flash(f'Task "{task_title}" edited successfully!', 'success')
-        return redirect(url_for('dashboard'))
-  
-
-  return render_template('edit_task.html', tasks=tasks ,members=members ,projects=projects)
-# ****************************************************************************************************************
-
-
-
-# ****************************************************************************************************************
 # ****************************     Dec task update    ***************************************************************
 # ****************************************************************************************************************
 
@@ -459,9 +467,6 @@ def DecTask(task_id, status):
       
       return redirect(url_for('dashboard'))
     
-
-
-
 
 
 # ****************************************************************************************************************
@@ -493,32 +498,9 @@ def Filter_Ok_Task():
          
    return redirect(url_for('dashboard'))
 
-# ****************************************************************************************************************
-# ****************************     delete task     ***************************************************************
-# ****************************************************************************************************************
-
-
-@app.route('/delete_task', methods = ['POST'])
-
-@login_required
-@leader_required
-
-def delete_task():
- 
-  task_ID_01 = request.form.get('task_id')
-  task_title = request.form.get('task_title')
-  
-  from DataBase import Delete_task
-  Delete_task (task_ID_01)
-
-  flash(f'Task "{task_title}" deleted successfully!', 'success')
-
-  return redirect(url_for('dashboard'))
 
 # ****************************************************************************************************************
-
-# ****************************************************************************************************************
-# ****************************    Team_Management     ***************************************************************
+# ****************************    Team_Management     ************************************************************
 # ****************************************************************************************************************
 
 
@@ -534,8 +516,11 @@ def Team_management():
       return render_template('Team.html', users=users)
 
 
+
 # ****************************************************************************************************************
+# ****************************    update              ************************************************************
 # ****************************************************************************************************************
+
 
 @app.route('/task/<int:task_id>/update', methods=['POST'])
 @login_required
@@ -594,6 +579,7 @@ def update_task(task_id):
     return redirect(url_for('dashboard'))
 
 # ****************************************************************************************************************
+# ****************************    resolve              ***********************************************************
 # ****************************************************************************************************************
 
 
@@ -677,7 +663,7 @@ def get_overdue_tasks():
     return jsonify(tasks_data)
 
 # ****************************************************************************************************************
-# ****************************************************************************************************************
+# ***********************************  check-notifications  ******************************************************
 
 @app.route('/api/check-notifications')
 @login_required
@@ -809,5 +795,19 @@ def add_project():
  return render_template('add_project.html')
 
 
+# ****************************************************************************************************************
+# ****************************    Search data project     ***********************************************************
+# ****************************************************************************************************************
 
+@app.route('/Search_Data_project', methods=['GET', 'POST'])
+@login_required
+@leader_required
+def Search_Projects():
 
+   search_v = request.args.get('search_v')
+
+   from DataBase import Search_Project
+   Projects = Search_Project(search_v)
+  
+   return render_template('Projects.html', Projects=Projects)
+   
