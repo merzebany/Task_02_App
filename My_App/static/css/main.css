@@ -29,6 +29,8 @@
  .navbar {
    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
    color: #3B4953;
+
+  
  }
 
  .sidebar {
@@ -86,6 +88,7 @@
 
  .card-body {
    padding: 1.5rem;
+   
  }
 
  .status-badge {

@@ -1,22 +1,63 @@
 {% extends "base.html" %} {% block title %}Leader Dashboard - TaskFlow{%
-endblock %} {% block content %}
+endblock %}
+
+{% block content %}
+
+<style>
+  .task-card {
+    border: 3px solid #ffffff;
+  }
+
+  .task-card.completed {
+    border-color: #006927bc;
+  }
+
+  .task-card.overdue {
+    border-color: #ff0000;
+    animation: pulse 2s infinite;
+  }
+
+  .task-card.delayed {
+    border-color: #ff0000;
+    animation: pulse 2s infinite;
+  }
+
+  .task-card.pending {
+    border-color: #ffffff;
+  }
+</style>
+
+
 <div class="d-flex justify-content-between align-items-center mb-4">
   <h2 class="fw-bold"><i class="bi bi-speedometer2 me-2"></i>Team Dashboard</h2>
+
+
+  <div class="d-flex justify-content-between align-items-center mb-2">
+
+    <div class="form-check me-4">
+      <input class="form-check-input Ch_01" type="checkbox" value="" id="Table_View_check" checked>
+      <label class="form-check-label" for="Table_View_check">
+        Table View
+      </label>
+    </div>
+
+    <div class="form-check me-4">
+      <input class="form-check-input" type="checkbox" value="" id="card_View_check">
+      <label class="form-check-label" for="card_View_check">
+        Card View
+      </label>
+    </div>
+  </div>
+
   <a href="{{ url_for('assign_task') }}" class="btn btn-primary">
     <i class="bi bi-plus-circle me-1"></i> Assign New Task
   </a>
-</div>
 
-<!-- Overdue Tasks Alert Section -->
-<!-- <div id="overdue-alert-section" class="mb-4" style="display: none;">
-  <div class="alert alert-danger d-flex align-items-center" role="alert">
-    <i class="bi bi-exclamation-triangle-fill me-3" style="font-size: 1.5rem;"></i>
-    <div>
-      <h5 class="alert-heading">Action Required: Overdue Tasks</h5>
-      <p class="mb-0">You have tasks that require your attention. Please review and take action below.</p>
-    </div>
-  </div>
-</div> -->
+
+
+
+
+</div>
 
 <!-- Team Overview Cards -->
 <div class="row mb-4">
@@ -81,9 +122,14 @@ endblock %} {% block content %}
   </div>
 </div>
 
+
+<!-- ********************************************************************************************************** -->
 <!-- Tasks Table -->
+<!-- ********************************************************************************************************** -->
+
 <div class="card">
-  <div class="card-header d-flex justify-content-between align-items-center">
+
+  <div class="card-header d-flex justify-content-between align-items-center" style="border-bottom: solid #3B4953 5px;">
     <span>Team Tasks</span>
 
     <form class="d-flex" role="search">
@@ -133,9 +179,11 @@ endblock %} {% block content %}
     </div>
   </div>
 
+  <!-- ********************************************  table - card  view  ********************************* -->
 
+  <!-- ********************************************  table  view  ********************************* -->
 
-  <div class="card-body p-0">
+  <div id="table_view" class="card-body p-0 table_view">
     <div class="table-responsive">
       <table class="table table-hover mb-0" id="data-table">
         <thead>
@@ -259,6 +307,182 @@ endblock %} {% block content %}
       </table>
     </div>
   </div>
+
+  <!-- ******************************************************************************************** -->
+  <!-- ********************************************  card view    ********************************* -->
+  <!-- ******************************************************************************************** -->
+
+  <div id="card_view" class="card-body p-0 card_view"
+    style="display:none; overflow-y: auto; overflow-x: hidden; max-height: 62vh; background-color:#EBF4DD">
+    <div class="row mt-3 mx-3">
+      {% for task in tasks %}
+      <div class="col-md-12 mb-1 mt-1 task-row" data-status="{{ task.status }}">
+        <div
+          class="card task-card {% if task.status == 'completed' %}completed{% elif  task.current_deadline < now %}overdue{% elif task.status == 'delayed' %}delayed{% else %}pending{% endif %}">
+          <div class="card-body">
+            <div class="d-flex center justify-content-between align-items-center mb-3">
+              <div>
+              </div>
+
+              <div>
+                <h5 class="text-muted mb-0">{{ task.assigned_to_fullname }}</h5>
+              </div>
+
+              <div>
+                {% if task.status == 'completed' %}
+                <span class="status-badge status-completed">
+                  <i class="bi bi-check-lg me-1"></i> Completed
+                </span>
+
+                {% elif task.status == 'delayed' and task.current_deadline < now %} <span
+                  class="status-badge status-overdue-delayed">
+                  <i class="bi bi-clock me-1"></i> Delayed
+                  <i class="bi bi-exclamation-lg me-1"></i> Overdue {% elif
+                  task.current_deadline < now %} <span class="status-badge status-overdue">
+                    <i class="bi bi-exclamation-lg me-1"></i> Overdue
+                    </span>
+                    {% elif task.status == 'delayed' %}
+                    <span class="status-badge status-delayed">
+                      <i class="bi bi-clock me-1"></i> Delayed
+                    </span>
+                    </span>
+
+                    {% else %}
+                    <span class="status-badge status-pending">
+                      <i class="bi bi-hourglass me-1"></i> Pending
+                    </span>
+
+                    {% endif %}
+              </div>
+
+            </div>
+
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <h5 class="card-title fw-bold mb-1">{{ task.title }}</h5>
+                <h5 class="card-title fw-bold mb-1">{{ task.project_name }}</h5>
+                <p class="text-muted mb-0">{{ task.description }}</p>
+              </div>
+
+
+
+            </div>
+
+            <div class="mb-3">
+              <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-calendar-event text-primary me-2"></i>
+                <span>Start: <strong>{{ task.start_date.strftime('%b %d, %Y') }}</strong></span>
+              </div>
+              <div class="d-flex align-items-center">
+                <i class="bi bi-alarm text-danger me-2"></i>
+                <span>Deadline:
+                  <strong
+                    class="{% if task.current_deadline < now and task.status != 'completed' %}text-danger{% endif %}">
+                    {{ task.current_deadline.strftime('%b %d, %Y at %I:%M %p') }}
+                  </strong>
+                </span>
+              </div>
+            </div>
+
+            {% if task.status == 'delayed' and task.reason_for_delay %}
+            <div class="alert alert-warning p-2 mb-3">
+              <i class="bi bi-info-circle me-1"></i> <strong>Delay Reason:</strong> {{
+              task.reason_for_delay|truncate(250)
+              }}
+            </div>
+            {% endif %}
+
+
+
+            <div class="d-flex center justify-content-around align-items-center mb-3">
+
+
+              <div class="action-buttons">
+                {% if task.status != 'completed' and task.current_deadline < now %} <button
+                  class="btn btn-sm btn-warning resolve-task-btn" data-task-id="{{ task.task_id }}"
+                  data-task-title="{{ task.title }}" data-bs-toggle="modal" data-bs-target="#resolveTaskModal">
+                  <i class="bi bi-bell-fill me-1"></i> Resolve
+                  </button>
+                  {% endif %}
+
+                  <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
+                    data-bs-target="#taskDetailsModal" data-task-id="{{ task.task_id }}"
+                    data-task-title="{{ task.title }}" data-task-desc="{{ task.description }}"
+                    data-task-start="{{ task.start_date.strftime('%Y-%m-%dT%H:%M') }}"
+                    data-task-deadline="{{ task.current_deadline.strftime('%Y-%m-%dT%H:%M') }}"
+                    data-task-status="{{ task.status }}" data-task-member="{{ task.assigned_to_fullname }}"
+                    data-task-reason="{{ task.reason_for_delay if task.reason_for_delay else '' }}">
+                    <i class="bi bi-eye me-1"></i> View
+                  </button>
+
+                  <button class="btn btn-sm btn-outline-primary Edit_But" data-bs-toggle="tooltip"
+                    data-bs-placement="top" data-bs-title="Edit User"
+                    onclick="window.location.href='/EditTask?EE={{  task.task_id  }}'">
+                    <i class="bi bi-pencil-square"></i> Edit
+                  </button>
+
+
+                  <button id="Delete_But" class="btn btn-sm btn-outline-danger  Delete_View_But" type="button"
+                    data-bs-placement="top" data-bs-title="Delete Task" data-bs-toggle="modal"
+                    data-bs-target="#exampleModal" data-class-value="{{  task.task_id }}"
+                    onclick="Del_Atr('{{ task.title }}','{{ task.task_id }}')">
+                    <i class="bi bi-trash"></i> Delete
+                  </button>
+
+                  <button id="Dec_But" class="btn btn-sm btn-outline-danger  Dec_View_But" type="button"
+                    data-bs-placement="top" data-bs-title="Task Dec" data-class-value="{{  task.task_id }}"
+                    onclick="window.location.href='/DecTask/{{ task.task_id }}/{{ task.status }}'">
+                    <i class="bi bi-journal-check"></i></i> Ok
+                  </button>
+
+              </div>
+
+
+            </div>
+            <!-- {% if task.status != 'completed' %}
+            <div class="action-buttons">
+              <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#completeTaskModal"
+                data-task-id="{{ task.task_id }}" data-task-title="{{ task.title }}">
+                <i class="bi bi-check-circle me-1"></i> Mark Complete
+              </button>
+              <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#delayTaskModal"
+                data-task-id="{{ task.task_id }}" data-task-title="{{ task.title }}">
+                <i class="bi bi-clock-history me-1"></i> Request Extension
+              </button>
+            </div>
+            {% else %}
+            <div class="alert alert-success mb-0">
+              <i class="bi bi-check-circle me-1"></i> Completed on {{ task.completed_at.strftime('%b %d, %Y at %I:%M
+              %p')
+              }}
+            </div>
+            {% endif %} -->
+
+
+          </div>
+
+
+
+        </div>
+      </div>
+      {% endfor %}
+
+      {% if tasks|length == 0 %}
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body text-center py-5">
+            <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+            <h4 class="text-muted">No tasks assigned yet</h4>
+            <p class="text-muted">Check back later or contact your team leader for new assignments</p>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+
 </div>
 
 <!-- Add this hidden element with the count -->
@@ -405,7 +629,8 @@ endblock %} {% block content %}
 
 <!--  ***************************** Pationation Area ********************************************** -->
 
-<div class="container sticky-bottom text-center mx-auto fw-bold" style="position: absolute; width: 30%">
+<div id="pationation_area" class="container sticky-bottom text-center  mx-auto fw-bold"
+  style="position:fixed ; width: 30%;  display: block; ">
   <div class="row text-center">
     <div class="col">
       <div class="row">
@@ -496,6 +721,99 @@ endblock %} {% block content %}
     Filter_by_member_v.value = "Choose member for filter......."
   }
 
+
+
+
+  //   ******************************* Table - card view ********************************************
+
+  let Table_View_check_v = document.getElementById('Table_View_check');
+  let Card_View_check_v = document.getElementById('card_View_check');
+  let Table_View_v = document.getElementById('table_view');
+  let Card_View_v = document.getElementById('card_view');
+  let pationation_area_v = document.getElementById('pationation_area');
+
+  // Add an event listener to the checkbox
+
+  Table_View_check_v.addEventListener('change', () => {
+    if (Table_View_check_v.checked) {
+
+      Table_View_v.style.display = 'block'; // Show the element
+      pationation_area_v.style.display = 'block';
+      Card_View_v.style.display = 'none';
+      Card_View_check_v.checked = false;
+
+      localStorage.setItem("Table_View_local", "Yes")
+      localStorage.setItem("Card_View_local", "No")
+    } else {
+
+      Table_View_v.style.display = 'none';
+      pationation_area_v.style.display = 'none';  // Show the element
+      Card_View_v.style.display = 'block';
+      Card_View_check_v.checked = true;
+      localStorage.setItem("Table_View_local", "No")
+      localStorage.setItem("Card_View_local", "Yes")
+
+
+    }
+  });
+
+
+
+  Card_View_check_v.addEventListener('change', () => {
+    if (Card_View_check_v.checked) {
+
+
+      Card_View_v.style.display = 'block';  // Show the element
+      Table_View_v.style.display = 'none';
+      pationation_area_v.style.display = 'none';
+      Table_View_check_v.checked = false;
+      localStorage.setItem("Table_View_local", "No")
+      localStorage.setItem("Card_View_local", "Yes")
+
+    } else {
+
+      Card_View_v.style.display = 'none';  // Show the element
+      Table_View_v.style.display = 'block';
+      pationation_area_v.style.display = 'block';
+      Table_View_check_v.checked = true;
+      localStorage.setItem("Table_View_local", "Yes")
+      localStorage.setItem("Card_View_local", "No")
+
+    }
+  });
+
+
+  if (localStorage.getItem("Table_View_local") === "Yes") {
+
+    Card_View_v.style.display = 'none';  // Show the element
+    Table_View_v.style.display = 'block';
+    pationation_area_v.style.display = 'block';
+    Table_View_check_v.checked = true;
+
+  } else {
+
+    Card_View_v.style.display = 'block';  // Show the element
+    Table_View_v.style.display = 'none';
+    pationation_area_v.style.display = 'none';
+    Table_View_check_v.checked = false;
+
+  };
+
+  if (localStorage.getItem("Card_View_local") === "Yes") {
+
+    Card_View_v.style.display = 'block';  // Show the element
+    Table_View_v.style.display = 'none';
+    pationation_area_v.style.display = 'none';
+    Card_View_check_v.checked = true;
+
+  } else {
+
+    Card_View_v.style.display = 'none';  // Show the element
+    Table_View_v.style.display = 'block';
+    pationation_area_v.style.display = 'block';
+    Card_View_check_v.checked = false;
+
+  };
 
 </script>
 

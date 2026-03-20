@@ -146,37 +146,7 @@
 
 {% block scripts %}
 
-<script>
-  //  Set default dates (today for start, 3 days from now for end)
-  document.addEventListener('DOMContentLoaded', function () {
-    const now = new Date();
-    const startDateInput = document.getElementById('start_date');
-    const endDateInput = document.getElementById('end_date');
 
-    // Set start date to today at 9 AM
-    const startDate = new Date(now);
-    startDate.setHours(9, 0, 0, 0);
-    startDateInput.value = startDate.toISOString().slice(0, 16);
-
-    // Set end date to 3 days from now at 5 PM
-    const endDate = new Date(now);
-    endDate.setDate(endDate.getDate() + 3);
-    endDate.setHours(17, 0, 0, 0);
-    endDateInput.value = endDate.toISOString().slice(0, 16);
-
-    // Ensure end date is after start date
-    endDateInput.min = startDateInput.value;
-
-    startDateInput.addEventListener('change', function () {
-      endDateInput.min = this.value;
-      if (new Date(endDateInput.value) <= new Date(this.value)) {
-        const newEndDate = new Date(this.value);
-        newEndDate.setDate(newEndDate.getDate() + 1);
-        endDateInput.value = newEndDate.toISOString().slice(0, 16);
-      }
-    });
-  });
-</script>
 
 
 

@@ -22,6 +22,8 @@ try:
     
     # db = pymssql.connect(server='MERZ\MYDATABASE', user='merzo', password='merzo1976', database='Task_App')
 
+
+
     # **********************************************************************************************************
     # **********************pymssql*************************
    server=r'41.38.197.252:50067'  #41.38.197.252  MERZ\\MYDATABASE MERZ\PRIMAVERASQL  41.38.197.252,50067
@@ -77,7 +79,6 @@ try:
     
 
       cr.execute(f"SELECT user_id, username, password, role, full_name FROM [user] WHERE user_id = %s", (user_id,))
-      # cr.execute(f"SELECT user_id, username, password, role, full_name FROM [user] WHERE user_id ='{user_id}'")
       return  cr.fetchone()
     
 
@@ -103,7 +104,7 @@ try:
 
 
 # **********************************************************************************************************
-# ********************************  Delete Emp  Data *******************************************************
+# ********************************  Delete User  Data *******************************************************
 # **********************************************************************************************************
 
    def Delete_user(user_id):
@@ -157,15 +158,10 @@ try:
 
    def Task_Dlay (current_user_id,now):    #user_name
      
-    #   cr.execute(f"select * from [task] where assigned_by_id ='{current_user_id}' ORDER BY current_deadline ")  
-    #   return  cr.fetchall()
       
       cr.execute(f"select * from [Task_View] where assigned_by_id = %s and current_deadline < %s and Dec = 0  ORDER BY current_deadline ", (current_user_id,now))  
-      # cr.execute(f"select * from [Task_View] where assigned_by_id = '{current_user_id}' and current_deadline < '{now}' and Dec = 0  ORDER BY current_deadline ")  
-
       return  cr.fetchall()
    
-
 
 # # **********************************************************************************************************
 # # ********************************  Task filter assigned_to_id  ********************************************
@@ -173,11 +169,9 @@ try:
 
    def Task_assigned_to_CurrentUser (current_user_id):    #user_name
      
-    #   cr.execute(f"select * from [task] where assigned_to_id ='{current_user_id}' ORDER BY current_deadline ")  
-    #   return  cr.fetchall()
+  
       cr = db.cursor(as_dict=True)
       cr.execute(f"select * from [Task_View] where assigned_to_id = %s and Dec = 0 ORDER BY current_deadline ", (current_user_id,))
-      # cr.execute(f"select * from [Task_View] where assigned_to_id = '{current_user_id}' and Dec = 0 ORDER BY current_deadline ")  
       return  cr.fetchall()
 
 
@@ -189,8 +183,6 @@ try:
    def Filter_task_assigned_by_id(Search_V_01,current_user_id):
       cr = db.cursor(as_dict=True)
       cr.execute(f"select * from Task_View where assigned_by_id = %s and Dec = 0 and ( title LIKE  '%' + %s + '%' or description LIKE  '%' + %s + '%' or project_name LIKE  '%' + %s + '%')  ORDER BY current_deadline ", (current_user_id, Search_V_01, Search_V_01, Search_V_01))
-      # cr.execute(f"select * from Task_View where assigned_by_id = '{current_user_id}' and Dec = 0 and ( title LIKE  '%' + '{Search_V_01}' + '%' or description LIKE  '%' + '{Search_V_01}' + '%' or project_name LIKE  '%' + '{Search_V_01}' + '%')  ORDER BY title ")
-
       return  cr.fetchall()
     
 # **********************************************************************************************************
@@ -212,7 +204,6 @@ try:
    def Overdue_Tasks_Member (assigned_to_id,now):    
       cr = db.cursor(as_dict=True)
       cr.execute(f"select * from [Task_View] where assigned_to_id = %s and Dec = 0 and (current_deadline < %s or requires_leader_attention = 1) and status <> 'completed'", (assigned_to_id, now))
-      # cr.execute(f"select * from [Task_View] where assigned_to_id = '{assigned_to_id}' and Dec = 0 and (current_deadline < '{now}' or requires_leader_attention = 1) and status <> 'completed'", (assigned_to_id, now))
       return  cr.fetchall()
    
 # # **********************************************************************************************************
@@ -236,7 +227,7 @@ try:
      
  
       cr.execute(f"select * from [Task_View] where task_id = %s ", (task_id,))  
-      # cr.execute(f"select * from [Task_View] where task_id = '{task_id}' ")  
+     
       return  cr.fetchone()
 
 
