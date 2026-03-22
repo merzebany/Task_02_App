@@ -78,8 +78,20 @@ try:
    def user_table(user_id):
     
 
-      cr.execute(f"SELECT user_id, username, password, role, full_name FROM [user] WHERE user_id = %s", (user_id,))
+      cr.execute(f"SELECT user_id, username, password, role, full_name, user_telegram_TOKEN, user_telegram_CHAT_ID, user_telegram_OK FROM [user] WHERE user_id = %s", (user_id,))
       return  cr.fetchone()
+
+# **********************************************************************************************************
+# ********************************  user by user id  for tel       ************************************************
+# **********************************************************************************************************
+
+   def user_table_tel(user_id):
+    
+      cr = db.cursor(as_dict=True)
+      cr.execute(f"SELECT * FROM [user] WHERE user_id = %s", (user_id,))
+      return  cr.fetchone()
+    
+
     
 
 # **********************************************************************************************************
@@ -87,7 +99,8 @@ try:
 # **********************************************************************************************************
 
    def user_check(user_name):    #user_name
-     
+
+      
       cr.execute(f"select user_id, username, password, role, full_name from [user] where username ='{user_name}'")  # where username ='{user_name}'
       return  cr.fetchone()
    
@@ -301,14 +314,14 @@ try:
 # ********************************  ADD new user **********************************************************
 # **********************************************************************************************************
 
-   def ADD_User( user_name, user_password, user_role,user_full_name ):
+   def ADD_User( user_name, user_password, user_role,user_full_name,user_telegram_TOKEN,user_telegram_CHAT_ID,user_telegram_OK ):
                
 
      cr.execute("""
             INSERT INTO [user] (
-                username, password, role, full_name
-            ) VALUES (%s, %s, %s, %s)
-        """, (user_name, user_password, user_role, user_full_name))
+                username, password, role, full_name, user_telegram_TOKEN, user_telegram_CHAT_ID, user_telegram_OK
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (user_name, user_password, user_role, user_full_name,user_telegram_TOKEN,user_telegram_CHAT_ID,user_telegram_OK))
      
      db.commit() 
        
@@ -319,20 +332,26 @@ try:
 # **********************************************************************************************************
 
  
-   def Edit_User(user_id ,user_name, user_password, user_role,user_full_name):
+   def Edit_User(user_id ,user_name, user_password, user_role,user_full_name,user_telegram_TOKEN,user_telegram_CHAT_ID,user_telegram_OK):
 
      cr.execute("""
             UPDATE [user] 
             SET   username = %s, 
                   password = %s, 
                   role = %s, 
-                  full_name = %s 
+                  full_name = %s,
+                  user_telegram_TOKEN = %s,
+                  user_telegram_CHAT_ID = %s,
+                  user_telegram_OK = %s
             WHERE user_id = %s
         """, (
             user_name, 
             user_password,  
             user_role,
             user_full_name,
+            user_telegram_TOKEN,
+            user_telegram_CHAT_ID,
+            user_telegram_OK,
             user_id
         ))
     

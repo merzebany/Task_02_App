@@ -8,8 +8,9 @@
     --dark-color: #1e293b;
     --light-color: #f8f9fa; */
 
-  --primary-color: #3B4953;
+   --primary-color: #3B4953;
    --secondary-color: #EBF4DD;
+   --secondary_2-color: #969c8c;
    --success-color: #4cc9f0;
    --warning-color: #f72585;
    --dark-color: #1e293b;
@@ -191,8 +192,8 @@
  }
 
  .btn-primary:hover {
-   background-color: var(--secondary-color);
-   border-color: var(--secondary-color);
+   background-color: var(--secondary_2-color);
+   border-color: var(--secondary_2-color);
  }
 
  .btn-warning {

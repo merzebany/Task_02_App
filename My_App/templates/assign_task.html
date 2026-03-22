@@ -65,6 +65,18 @@
             {% endfor %}
           </select>
         </div>
+      </div>
+
+
+      <div class="col-md-6">
+        <div class="d-flex justify-content-start align-items-center mb-2">
+          <input type="hidden" id="Tel_masg_comf_H" name="Tel_masg_comf_H" value="no">
+          <input type="checkbox" id="Tel_masg_comf" name="Tel_masg_comf"
+            style="width: 20px; height: 20px; cursor: pointer;" value="no">
+          <span style="height: 20px;"> &nbsp;&nbsp; Send massege to user by telegram</span>
+
+
+        </div>
 
       </div>
 
@@ -135,6 +147,21 @@
       maxOptions: 1000
     });
   });
+
+
+
+  const checkbox = document.getElementById('Tel_masg_comf');
+  const hidden = document.getElementById('Tel_masg_comf_H');
+
+  // Set initial value (unchecked = "no")
+  hidden.value = 'no';
+
+  // Update on change
+  checkbox.addEventListener('change', () => {
+    hidden.value = checkbox.checked ? 'yes' : 'no';
+
+  });
+
 </script>
 
 {% endblock %}

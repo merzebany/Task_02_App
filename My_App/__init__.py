@@ -22,8 +22,8 @@ login_manager.login_view = 'login'
 
 
 
-TELEGRAM_BOT_TOKEN = "8533540111:AAHeyCTOilpqxBF_-6jt44OnFiKA9I1rGe8"
-TELEGRAM_CHAT_ID = "6878108547"
+# TELEGRAM_BOT_TOKEN = "8533540111:AAHeyCTOilpqxBF_-6jt44OnFiKA9I1rGe8"
+# TELEGRAM_CHAT_ID = "6878108547"
 
 
 # Models
@@ -204,7 +204,7 @@ def assign_task():
         current_deadline = end_date
         status='pending'
         Project_id = request.form['Project_assigned']
-
+        Send_tel_massege = request.form['Tel_masg_comf_H']
   
         # Validate dates
         if end_date <= start_date:
@@ -215,7 +215,41 @@ def assign_task():
         from DataBase import ADD_Task
         ADD_Task(title, description, assigned_to_id,assigned_by_id, start_date, original_end_date, current_deadline, status, datetime.now().replace(microsecond=0),Project_id)
 
+       # ****************************************
+
+        if Send_tel_massege == 'yes':
+          
+          from DataBase import user_table_tel
+          users = user_table_tel(assigned_to_id)
+    
+          if  users['user_telegram_OK'] == True and  users['user_telegram_TOKEN'] !=None  and users['user_telegram_CHAT_ID'] != None :
+             TELEGRAM_BOT_TOKEN = users['user_telegram_TOKEN']
+             TELEGRAM_CHAT_ID = users['user_telegram_CHAT_ID']
+
+          from DataBase import project_table_id
+          Project_V = project_table_id(Project_id)
+         
+          
+          text = (
+             f"نشاط جديد\n"
+             f"اسم المشروع :{Project_V['project_name']}\n"
+             f"العنوان : {title}\n"
+             f"النشاط : {description}\n"
+             f" تاريخ بداية النشاط : {start_date.strftime('%b %d, %Y')}\n"
+             f" تاريخ نهو النشاط : {end_date.strftime('%b %d, %Y')}")
+
+          url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+          payload = {
+        'chat_id': TELEGRAM_CHAT_ID,
+        'text': text,
+        'parse_mode': 'Markdown'  # optional
+        }
+          requests.post(url, json=payload)
         
+
+
+            # **************************************
+
         flash(f'Task "{title}" assigned successfully!', 'success')
         return redirect(url_for('dashboard'))
     
@@ -329,9 +363,13 @@ def add_user():
         user_role = request.form['user_role']
         user_full_name = request.form['full_name']
 
+        user_telegram_TOKEN = request.form['user_telegram_TOKEN']
+        user_telegram_CHAT_ID = request.form['user_telegram_CHAT_ID']
+        user_telegram_OK = request.form['user_telegram_OK']
+
 
         from DataBase import ADD_User
-        ADD_User(user_name, user_password, user_role,user_full_name)
+        ADD_User(user_name, user_password, user_role,user_full_name,user_telegram_TOKEN,user_telegram_CHAT_ID,user_telegram_OK)
 
         flash(f'User "{user_full_name}" added successfully!', 'success')
         return redirect(url_for('Team_management'))
@@ -361,8 +399,13 @@ def EditUser():
         user_role = request.form['user_role']
         user_full_name = request.form['full_name']
 
+        user_telegram_TOKEN = request.form['user_telegram_TOKEN']
+        user_telegram_CHAT_ID = request.form['user_telegram_CHAT_ID']
+        user_telegram_OK = request.form['user_telegram_OK']
+
+
         from DataBase import Edit_User
-        Edit_User(user_id_v,user_name, user_password, user_role,user_full_name)
+        Edit_User(user_id_v,user_name, user_password, user_role,user_full_name, user_telegram_TOKEN, user_telegram_CHAT_ID, user_telegram_OK)
 
         flash(f'User "{user_full_name}" edit successfully!', 'success')
         return redirect(url_for('Team_management'))
@@ -566,6 +609,40 @@ def update_task(task_id):
         from DataBase import update_Task_status
         update_Task_status(task_id, status, completed_at, requires_leader_attention)
         flash('Task marked as completed!', 'success') 
+        
+
+# ***********************************************************************************************
+# ***********************************************************************************************
+        from DataBase import Current_Task
+        task = Current_Task(task_id)
+
+        from DataBase import user_table_tel
+        users = user_table_tel(task['assigned_by_id'])
+    
+        if  users['user_telegram_OK'] == True and  users['user_telegram_TOKEN'] !=None  and users['user_telegram_CHAT_ID'] != None :
+             TELEGRAM_BOT_TOKEN = users['user_telegram_TOKEN']
+             TELEGRAM_CHAT_ID = users['user_telegram_CHAT_ID']
+
+        text = (
+             f"نشاط تم\n"
+             f"المسؤول : {task['assigned_to_fullname']}\n"
+             f"اسم المشروع :{task['project_name']}\n"
+             f"العنوان : {task['title']}\n"
+             f"النشاط : {task['description']}\n"
+             f"تاريخ نهو النشاط : {task['completed_at'].strftime('%b %d, %Y')}")
+
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+        payload = {
+        'chat_id': TELEGRAM_CHAT_ID,
+        'text': text,
+        'parse_mode': 'Markdown'  # optional
+        }
+        requests.post(url, json=payload)
+        
+# ***********************************************************************************************
+# ***********************************************************************************************
+
+
 
     elif action == 'delay':
         reason = request.form['reason']
@@ -587,7 +664,39 @@ def update_task(task_id):
         update_Task_status_delay(task_id,status,reason_for_delay, current_deadline, requires_leader_attention) 
 
         flash('Task deadline updated successfully!', 'success')
+        
+# ***********************************************************************************************
+# ***********************************************************************************************
+        from DataBase import Current_Task
+        task = Current_Task(task_id)
+
+        from DataBase import user_table_tel
+        users = user_table_tel(task['assigned_by_id'])
     
+        if  users['user_telegram_OK'] == True and  users['user_telegram_TOKEN'] !=None  and users['user_telegram_CHAT_ID'] != None :
+             TELEGRAM_BOT_TOKEN = users['user_telegram_TOKEN']
+             TELEGRAM_CHAT_ID = users['user_telegram_CHAT_ID']
+
+        text = (
+             f"نشاط تم تأجيلة\n"
+             f"المسؤول : {task['assigned_to_fullname']}\n"
+             f"اسم المشروع :{task['project_name']}\n"
+             f"العنوان : {task['title']}\n"
+             f"النشاط : {task['description']}\n"
+             f"سبب التاجيل : {task['reason_for_delay']}\n"
+             f"تاريخ نهو النشاط الجديد : {task['current_deadline'].strftime('%b %d, %Y')}")
+
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+        payload = {
+        'chat_id': TELEGRAM_CHAT_ID,
+        'text': text,
+        'parse_mode': 'Markdown'  # optional
+        }
+        requests.post(url, json=payload)
+        
+# ***********************************************************************************************
+# ***********************************************************************************************
+
     
     return redirect(url_for('dashboard'))
 
@@ -621,7 +730,9 @@ def resolve_task(task_id):
         
         from DataBase import update_Task_status
         update_Task_status(task_id, status, completed_at, requires_leader_attention)
-         
+        
+
+
     elif action == 'postpone':
         new_deadline_str = request.form['new_deadline']
         new_deadline = datetime.strptime(new_deadline_str, '%Y-%m-%dT%H:%M')
@@ -796,8 +907,8 @@ def get_overdue_tasks():
     'id': task['task_id'],  # ← Use brackets instead of dot notation
     'title': task['title'],
     'assigned_to': task['assigned_to_fullname'],
-    'current_deadline': task['current_deadline'].isoformat(),
-    'original_deadline': task['original_end_date'].isoformat(),
+    'current_deadline': task['current_deadline'].strftime('%b %d, %Y'),
+    'original_deadline': task['original_end_date'].strftime('%b %d, %Y'),
     'reason_for_delay': task['reason_for_delay'],
     'description': task['description'],
     'projectname': task['project_name'],
@@ -805,30 +916,43 @@ def get_overdue_tasks():
      } for task in overdue_tasks]
    
 
-   
-# ******************* sent telegram massege *******************
 
-    for task in tasks_data:
+# ******************* sent telegram massege *******************
+    
+    from DataBase import user_table_tel
+
+    users = user_table_tel(current_user.id)
+    
+    if  users['user_telegram_OK'] == True and  users['user_telegram_TOKEN'] !=None  and users['user_telegram_CHAT_ID'] != None :
       
-      text = (
+      TELEGRAM_BOT_TOKEN = users['user_telegram_TOKEN']
+      TELEGRAM_CHAT_ID = users['user_telegram_CHAT_ID']
+
+      for task in tasks_data:
+      
+        text = (
+             f"نشاط متاخر\n"
              f"اسم المشروع : {task['projectname']}\n"
              f"العنوان : {task['title']}\n"
              f"النشاط : {task['description']}\n"
              f"المسؤول : {task['assigned_to']}\n"
              f" تاريخ نهو النشاط : {task['current_deadline']}")
 
-      url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-      payload = {
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+        payload = {
         'chat_id': TELEGRAM_CHAT_ID,
         'text': text,
         'parse_mode': 'Markdown'  # optional
         }
-      response = requests.post(url, json=payload)
+        response = requests.post(url, json=payload)
 
-      if response.status_code == 200:
+        if response.status_code == 200:
             success_count += 1
-      else:
+        else:
             error_details.append(response.text)
+
+
+    
 
     
 #  *********************************************************************
@@ -881,10 +1005,12 @@ def check_notifications():
 def send_telegram():
 
     now = datetime.now().replace(microsecond=0)
-
+     
     success_count = 0
     error_details = []
-
+   
+    TELEGRAM_BOT_TOKEN = ""
+    TELEGRAM_CHAT_ID = ""
 
     if current_user.role == 'leader' :
          from DataBase import Overdue_Tasks

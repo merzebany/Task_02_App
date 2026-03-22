@@ -12,6 +12,7 @@
 <div class="card">
   <div class="card-body">
     <form method="POST" action="{{ url_for('add_user') }}">
+
       <div class="row mb-3">
 
         <div class="col-md-6">
@@ -39,6 +40,27 @@
           <label for="full_name" class="form-label fw-bold">Full Name <span class="text-danger">*</span></label>
           <input type="text" class="form-control" id="full_name" name="full_name" placeholder="Enter user full name"
             required>
+        </div>
+
+        <div class="col-md-6">
+          <label for="user_telegram_TOKEN" class="form-label fw-bold">User Telegram_TOKEN </label>
+          <input type="text" class="form-control" id="user_telegram_TOKEN" name="user_telegram_TOKEN"
+            placeholder="Enter user Telegram TOKEN">
+        </div>
+
+        <div class="col-md-6">
+          <label for="user_telegram_CHAT_ID" class="form-label fw-bold">User Telegram_CHAT_ID </label>
+          <input type="text" class="form-control" id="user_telegram_CHAT_ID" name="user_telegram_CHAT_ID"
+            placeholder="Enter user Telegram CHAT_ID">
+        </div>
+
+        <div class="col-md-6">
+          <label for="user_telegram_OK" class="form-label fw-bold">Dec <span class="text-danger">*</span></label>
+          <select class="form-select" id="user_telegram_OK" name="user_telegram_OK" required>
+            <option value="">Select use need telegram or not</option>
+            <option value="0" selected>False</option>
+            <option value="1">True</option>
+          </select>
         </div>
 
 

@@ -46,6 +46,29 @@
         </div>
 
 
+        <div class="col-md-6">
+          <label for="user_telegram_TOKEN" class="form-label fw-bold">User Telegram_TOKEN </label>
+          <input type="text" class="form-control" id="user_telegram_TOKEN" name="user_telegram_TOKEN"
+            placeholder="Enter user Telegram TOKEN" value="{{ users[5] }}">
+        </div>
+
+        <div class="col-md-6">
+          <label for="user_telegram_CHAT_ID" class="form-label fw-bold">User Telegram_CHAT_ID </label>
+          <input type="text" class="form-control" id="user_telegram_CHAT_ID" name="user_telegram_CHAT_ID"
+            placeholder="Enter user Telegram CHAT_ID" value="{{ users[6] }}">
+        </div>
+
+        <div class="col-md-6">
+          <label for="user_telegram_OK" class="form-label fw-bold">Dec <span class="text-danger">*</span></label>
+          <select class="form-select" id="user_telegram_OK" name="user_telegram_OK" required>
+            <option value="">Select use need telegram or not</option>
+            <option value="0" {% if users[7]==0 %} selected {% endif %}>False</option>
+            <option value="1" {% if users[7]==1 %} selected {% endif %}>True</option>
+          </select>
+        </div>
+
+
+
 
       </div>
 
