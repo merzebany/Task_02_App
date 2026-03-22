@@ -25,7 +25,7 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-success bg-white sticky-top">
     <div class="container-fluid">
-      <a class="navbar-brand fw-bold " href="{{ url_for('dashboard') }}">
+      <a class="navbar-brand fw-bold" href="{{ url_for('dashboard') }}">
         <i class="bi bi-check2-square me-2"></i>TaskFlow
       </a>
 
@@ -67,10 +67,10 @@
     </div>
   </nav>
 
-  <div class="container-fluid fw-bold ">
+  <div class="container-fluid fw-bold">
     <div class="row">
       <!-- Sidebar for larger screens -->
-      <div class="col-lg-2 col-md-3 sidebar d-none d-md-block">
+      <div class="sidebar d-none d-md-block" style="width: 12%">
         <div class="text-center mb-4 pt-2">
           <div class="bg-white text-primary rounded-circle d-inline-flex align-items-center justify-content-center"
             style="
@@ -135,7 +135,7 @@
       </div>
 
       <!-- Main Content -->
-      <div class="col-lg-10 col-md-9 main-content">
+      <div class="main-content" style="width: 88%">
         {% with messages = get_flashed_messages(with_categories=true) %} {% if
         messages %} {% for category, message in messages %}
         <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
@@ -159,7 +159,9 @@
       {% if current_user.role == 'leader' or current_user.role == 'member' %} // ********************** Only for leaders and members, check for notifications every 2 minutes ***********************
       // Check for notifications periodically
       // checkNotifications();
-      setInterval(checkNotifications, 120000); // Check every 30 seconds
+
+      setInterval(checkNotifications, 12000); // Check every 30 seconds
+
 
       // Initialize notification permission
       if (
@@ -199,6 +201,7 @@
           // Show persistent notifications if needed
           if (data.has_notifications) {
             showOverdueNotifications();
+
           }
         })
         .catch((error) =>
@@ -207,6 +210,7 @@
     }
 
     function showOverdueNotifications() {
+
 
       fetch("/api/overdue-tasks", {
         headers: {
@@ -226,17 +230,17 @@
             const notification = document.createElement("div");
             notification.className = "windows-notification";
             notification.innerHTML = `
-                                  <div class="icon">
-                                      <i class="bi bi-exclamation-triangle"></i>
-                                  </div>
-                                  <div style="text-align: right;">
-                                      <h5>:  نشاط متاخر </h5>
-                                      <p><strong>${task.title}</strong></p>
-                                      <p><strong>${task.description}</strong></p>
-                                      <p><strong>${task.projectname}</strong></p>
-                                      <p>المسؤول  : ${task.assigned_to}<br>Deadline passed: ${formatDate(task.current_deadline)}</p>
-                                  </div>
-                              `;
+                                              <div class="icon">
+                                                  <i class="bi bi-exclamation-triangle"></i>
+                                              </div>
+                                              <div style="text-align: right;">
+                                                  <h5>:  نشاط متاخر </h5>
+                                                  <p><strong>${task.title}</strong></p>
+                                                  <p><strong>${task.description}</strong></p>
+                                                  <p><strong>${task.projectname}</strong></p>
+                                                  <p>المسؤول  : ${task.assigned_to}<br>Deadline passed: ${formatDate(task.current_deadline)}</p>
+                                              </div>
+                                          `;
 
             // Add click event to go to dashboard
             notification.addEventListener("click", function () {
@@ -303,6 +307,7 @@
     function Notifications_Fun(event) {
       console.log("Notification button clicked");
       checkNotifications();
+
     }
 
 
@@ -310,8 +315,12 @@
     function Notifications_Fun(event) {
       event.preventDefault();
       checkNotifications();
+
     }
+
+
   </script>
+
 
   {% block scripts %}{% endblock %}
 </body>

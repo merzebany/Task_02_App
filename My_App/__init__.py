@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import datetime, timedelta
 from functools import wraps
-
+import requests
 from flask_login import UserMixin
 
 import os
@@ -19,6 +19,12 @@ app.config['JSON_AS_ASCII'] = False
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
+
+
+
+TELEGRAM_BOT_TOKEN = "8533540111:AAHeyCTOilpqxBF_-6jt44OnFiKA9I1rGe8"
+TELEGRAM_CHAT_ID = "6878108547"
+
 
 # Models
 
@@ -154,7 +160,14 @@ def dashboard():
 
           from DataBase import Overdue_Tasks
           Overdue_Tasks_V = Overdue_Tasks(current_user.id,now)
-         
+          
+        #   for task in Task_data:
+        #      if task['current_deadline']:
+        #       print(task['current_deadline'])
+        #       Task_data['formatted_current_deadline'] = task['current_deadline'].strftime('%d %b, %Y at %I:%M %p')
+        #      else:
+        #       Task_data['formatted_current_deadline'] = 'No deadline'
+
           
           return render_template('leader_dashboard.html', tasks=Task_data, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V)
       else:
@@ -626,73 +639,7 @@ def resolve_task(task_id):
     return jsonify({'success': True})
 
 
-# ****************************************************************************************************************
-# ****************************************************************************************************************
 
-@app.route('/api/overdue-tasks')
-@login_required
-# @leader_required
-def get_overdue_tasks():
-
-    now = datetime.now().replace(microsecond=0)
-
-    if current_user.role == 'leader' :
-         from DataBase import Overdue_Tasks
-         overdue_tasks = Overdue_Tasks(current_user.id, now)
-         
-
-    elif current_user.role == 'member' :
-         from DataBase import Overdue_Tasks_Member
-         overdue_tasks = Overdue_Tasks_Member(current_user.id, now)
-
-    tasks_data = [{
-    'id': task['task_id'],  # ← Use brackets instead of dot notation
-    'title': task['title'],
-    'assigned_to': task['assigned_to_fullname'],
-    'current_deadline': task['current_deadline'].isoformat(),
-    'original_deadline': task['original_end_date'].isoformat(),
-    'reason_for_delay': task['reason_for_delay'],
-    'description': task['description'],
-    'projectname': task['project_name'],
-    'status': task['status']
-     } for task in overdue_tasks]
-   
-
-    
-
-    return jsonify(tasks_data)
-
-# ****************************************************************************************************************
-# ***********************************  check-notifications  ******************************************************
-
-@app.route('/api/check-notifications')
-@login_required
-def check_notifications():
-    ## """Check if current user has notifications waiting"""
-
-    if current_user.role == 'leader' :
-         task_check_notifications_V1 = False
-         from DataBase import task_check_notifications
-         task_check_notifications_V = task_check_notifications (current_user.id)
-         
-         if task_check_notifications_V:
-            task_check_notifications_V1 = True
-    
-            return jsonify({'has_notifications': task_check_notifications_V1})
-         
-    if current_user.role == 'member' :
-         task_check_notifications_member_V1 = False
-         from DataBase import task_check_notifications_member
-         task_check_notifications_member_V = task_check_notifications_member (current_user.id)
-         
-         if task_check_notifications_member_V:
-            task_check_notifications_member_V1 = True
-    
-            return jsonify({'has_notifications': task_check_notifications_member_V1})
-         
-
-
-    return jsonify({'has_notifications': False})
 
 
 # ****************************************************************************************************************
@@ -811,3 +758,193 @@ def Search_Projects():
   
    return render_template('Projects.html', Projects=Projects)
    
+
+
+
+
+# ****************************************************************************************************************
+# ****************************   notification system massege    **************************************************
+# ****************************************************************************************************************
+
+
+
+# ****************************************************************************************************************
+# ****************************************************************************************************************
+
+@app.route('/api/overdue-tasks')
+@login_required
+# @leader_required
+def get_overdue_tasks():
+
+    now = datetime.now().replace(microsecond=0)
+
+
+    success_count = 0
+    error_details = []
+
+
+    if current_user.role == 'leader' :
+         from DataBase import Overdue_Tasks
+         overdue_tasks = Overdue_Tasks(current_user.id, now)
+         
+
+    elif current_user.role == 'member' :
+         from DataBase import Overdue_Tasks_Member
+         overdue_tasks = Overdue_Tasks_Member(current_user.id, now)
+
+    tasks_data = [{
+    'id': task['task_id'],  # ← Use brackets instead of dot notation
+    'title': task['title'],
+    'assigned_to': task['assigned_to_fullname'],
+    'current_deadline': task['current_deadline'].isoformat(),
+    'original_deadline': task['original_end_date'].isoformat(),
+    'reason_for_delay': task['reason_for_delay'],
+    'description': task['description'],
+    'projectname': task['project_name'],
+    'status': task['status']
+     } for task in overdue_tasks]
+   
+
+   
+# ******************* sent telegram massege *******************
+
+    for task in tasks_data:
+      
+      text = (
+             f"اسم المشروع : {task['projectname']}\n"
+             f"العنوان : {task['title']}\n"
+             f"النشاط : {task['description']}\n"
+             f"المسؤول : {task['assigned_to']}\n"
+             f" تاريخ نهو النشاط : {task['current_deadline']}")
+
+      url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+      payload = {
+        'chat_id': TELEGRAM_CHAT_ID,
+        'text': text,
+        'parse_mode': 'Markdown'  # optional
+        }
+      response = requests.post(url, json=payload)
+
+      if response.status_code == 200:
+            success_count += 1
+      else:
+            error_details.append(response.text)
+
+    
+#  *********************************************************************
+
+    return jsonify(tasks_data)
+
+# ****************************************************************************************************************
+# ***********************************  check-notifications  ******************************************************
+
+@app.route('/api/check-notifications')
+@login_required
+def check_notifications():
+    ## """Check if current user has notifications waiting"""
+
+    if current_user.role == 'leader' :
+         task_check_notifications_V1 = False
+         from DataBase import task_check_notifications
+         task_check_notifications_V = task_check_notifications (current_user.id)
+         
+         if task_check_notifications_V:
+            task_check_notifications_V1 = True
+    
+            return jsonify({'has_notifications': task_check_notifications_V1})
+         
+    if current_user.role == 'member' :
+         task_check_notifications_member_V1 = False
+         from DataBase import task_check_notifications_member
+         task_check_notifications_member_V = task_check_notifications_member (current_user.id)
+         
+         if task_check_notifications_member_V:
+            task_check_notifications_member_V1 = True
+    
+            return jsonify({'has_notifications': task_check_notifications_member_V1})
+         
+
+
+    return jsonify({'has_notifications': False})
+
+
+# ****************************************************************************************************************
+# ****************************   telegram massege    ***********************************************************
+# ****************************************************************************************************************
+
+
+
+@app.route('/api/send-telegram', methods=['GET'])
+@login_required
+@leader_required
+
+def send_telegram():
+
+    now = datetime.now().replace(microsecond=0)
+
+    success_count = 0
+    error_details = []
+
+
+    if current_user.role == 'leader' :
+         from DataBase import Overdue_Tasks
+         overdue_tasks = Overdue_Tasks(current_user.id, now)
+         
+
+    tasks_data = [{
+    'id': task['task_id'],  # ← Use brackets instead of dot notation
+    'title': task['title'],
+    'assigned_to': task['assigned_to_fullname'],
+    'current_deadline': task['current_deadline'].strftime('%b %d, %Y'),
+    'original_deadline': task['original_end_date'].isoformat(),
+    'reason_for_delay': task['reason_for_delay'],
+    'description': task['description'],
+    'projectname': task['project_name'],
+    'status': task['status']
+     } for task in overdue_tasks]
+   
+
+    # text=jsonify(tasks_data)
+    for task in tasks_data:
+      
+      text = (
+             f"اسم المشروع : {task['projectname']}\n"
+             f"العنوان : {task['title']}\n"
+             f"النشاط : {task['description']}\n"
+             f"المسؤول : {task['assigned_to']}\n"
+             f" تاريخ نهو النشاط : {task['current_deadline']}")
+
+      url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+      payload = {
+        'chat_id': TELEGRAM_CHAT_ID,
+        'text': text,
+        'parse_mode': 'Markdown'  # optional
+        }
+      response = requests.post(url, json=payload)
+
+      if response.status_code == 200:
+            success_count += 1
+      else:
+            error_details.append(response.text)
+   
+    
+    # if response.status_code == 200:
+
+    #     return jsonify({'status': 'sent'}), 200
+    # else:
+    #     return jsonify({'status': 'error', 'details': response.text}), 500
+
+    # if response.status_code == 200:
+
+    #      flash('Telegram massege was successfully send !', 'success')
+    #      return  redirect(url_for('dashboard'))
+    # else: 
+    #      error_detail = {'details': response.text}
+    #      flash(f'Telegram massege error : {error_detail} !', 'denger')
+    #      return  redirect(url_for('dashboard'))
+    
+    
+    if success_count == len(tasks_data):
+        return jsonify({'status': 'success', 'message': 'Telegram messages sent!'}), 200
+    else:
+        return jsonify({'status': 'error', 'details': error_details}), 500

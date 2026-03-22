@@ -34,14 +34,14 @@ endblock %}
 
   <div class="d-flex justify-content-between align-items-center mb-2">
 
-    <div class="form-check me-4">
+    <div class="form-check mx-3">
       <input class="form-check-input Ch_01" type="checkbox" value="" id="Table_View_check" checked>
       <label class="form-check-label" for="Table_View_check">
         Table View
       </label>
     </div>
 
-    <div class="form-check me-4">
+    <div class="form-check  mx-3">
       <input class="form-check-input" type="checkbox" value="" id="card_View_check">
       <label class="form-check-label" for="card_View_check">
         Card View
@@ -52,10 +52,6 @@ endblock %}
   <a href="{{ url_for('assign_task') }}" class="btn btn-primary">
     <i class="bi bi-plus-circle me-1"></i> Assign New Task
   </a>
-
-
-
-
 
 </div>
 
@@ -185,37 +181,38 @@ endblock %}
 
   <div id="table_view" class="card-body p-0 table_view">
     <div class="table-responsive">
-      <table class="table table-hover mb-0" id="data-table">
+      <table class="table table-hover mb-0" id="data-table" dir="rtl">
         <thead>
           <tr style="background: #90AB8B;">
-            <th style="background: #90AB8B;">Task</th>
-            <th class="text-center" style="background: #90AB8B;">Assigned To</th>
-            <th class="text-center" style="background: #90AB8B;">Start Date</th>
-            <th class="text-center" style="background: #90AB8B;">Deadline</th>
-            <th class="text-center" style="background: #90AB8B;">Status</th>
-            <th class="text-center" style="background: #90AB8B;">Resolve</th>
-            <th class="text-center" style="background: #90AB8B;">Actions</th>
-            <th class="text-center" style="background: #90AB8B;">OK.</th>
+            <th style="background: #90AB8B; width: 20%;">النشاط</th>
+            <th class="text-center" style="background: #90AB8B; width: 15%;">المشروع</th>
+            <th class="text-center" style="background: #90AB8B; width: 10%; ">المسؤول</th>
+            <th class="text-center" style="background: #90AB8B; width: 10%; ">تاريخ البدية</th>
+            <th class="text-center" style="background: #90AB8B; width: 10%; ">تاريخ النهاية</th>
+            <th class="text-center" style="background: #90AB8B; width: 8%; ">الحالة</th>
+            <th class="text-center" style="background: #90AB8B; width: 6%; ">Resolve</th>
+            <th class="text-center" style="background: #90AB8B; width: 15%; ">Actions</th>
+            <th class="text-center" style="background: #90AB8B; width: 6%; ">OK.</th>
           </tr>
         </thead>
         <tbody>
           {% for task in tasks %}
           <tr class="task-row" data-status="{{ task.status }}">
             <td>
-              <div class="fw-bold">{{ task.title }}</div>
-              <div class="text-muted small">
-                {{ task.description|truncate(40) }}
-              </div>
-              <div class="text-muted small">
-                المشروع : {{ task.project_name }}
+              <div class="fw-bold mb-2">{{ task.title }}</div>
+              <div class="text-muted small mb-2">
+                {{ task.description|truncate(150) }}
               </div>
             </td>
+
+            <td class="text-center">{{ task.project_name }}</td>
             <td class="text-center">{{ task.assigned_to_fullname }}</td>
-            <td class="text-center">{{ task.start_date.strftime('%b %d, %Y') }}</td>
+            <td class="text-center" dir="ltr">{{ task.start_date.strftime('%d %b, %Y') }}</td>
             <td class="text-center">
               <span
-                class="deadline-text {% if task.current_deadline < now and task.status != 'completed' %}deadline-overdue{% endif %}">
-                {{ task.current_deadline.strftime('%b %d, %Y') }}
+                class="deadline-text {% if task.current_deadline < now and task.status != 'completed' %}deadline-overdue{% endif %}"
+                dir="ltr">
+                {{ task.current_deadline.strftime('%d %b, %Y') }}
               </span>
               {% if task.status == 'delayed' and task.reason_for_delay %}
               <div class="text-muted small mt-1">
@@ -322,13 +319,6 @@ endblock %}
           <div class="card-body">
             <div class="d-flex center justify-content-between align-items-center mb-3">
               <div>
-              </div>
-
-              <div>
-                <h5 class="text-muted mb-0">{{ task.assigned_to_fullname }}</h5>
-              </div>
-
-              <div>
                 {% if task.status == 'completed' %}
                 <span class="status-badge status-completed">
                   <i class="bi bi-check-lg me-1"></i> Completed
@@ -355,13 +345,20 @@ endblock %}
                     {% endif %}
               </div>
 
+              <div>
+                <h5 class="text-muted mb-0">{{ task.assigned_to_fullname }}</h5>
+              </div>
+
+              <div>
+              </div>
+
             </div>
 
-            <div class="d-flex justify-content-between align-items-start mb-3">
-              <div>
-                <h5 class="card-title fw-bold mb-1">{{ task.title }}</h5>
-                <h5 class="card-title fw-bold mb-1">{{ task.project_name }}</h5>
-                <p class="text-muted mb-0">{{ task.description }}</p>
+            <div class="d-flex justify-content-end align-items-start mb-3">
+              <div dir="rtl">
+                <h5 class="card-title fw-bold mb-3">{{ task.title }}</h5>
+                <h5 class="card-title fw-bold mb-3">{{ task.project_name }}</h5>
+                <p class="text-muted mb-3">{{ task.description }}</p>
               </div>
 
 
@@ -369,24 +366,32 @@ endblock %}
             </div>
 
             <div class="mb-3">
-              <div class="d-flex align-items-center mb-2">
-                <i class="bi bi-calendar-event text-primary me-2"></i>
-                <span>Start: <strong>{{ task.start_date.strftime('%b %d, %Y') }}</strong></span>
-              </div>
-              <div class="d-flex align-items-center">
-                <i class="bi bi-alarm text-danger me-2"></i>
-                <span>Deadline:
-                  <strong
-                    class="{% if task.current_deadline < now and task.status != 'completed' %}text-danger{% endif %}">
-                    {{ task.current_deadline.strftime('%b %d, %Y at %I:%M %p') }}
-                  </strong>
+
+              <div class="d-flex justify-content-end align-items-center mb-2">
+
+                <span><strong>{{ task.start_date.strftime('%d %b, %Y') }}</strong> : تاريخ البداية النشاط &nbsp;&nbsp;
                 </span>
+                <i class="bi bi-calendar-event text-primary me-2"></i>
+
               </div>
+
+              <div class="d-flex justify-content-end align-items-center mb-2">
+
+                <span><strong
+                    class="{% if task.current_deadline < now and task.status != 'completed' %}text-danger{% endif %}">
+                    {{ task.current_deadline.strftime('%d %b, %Y at %I:%M %p') }}
+                  </strong>
+                  : &nbsp;تاريخ نهاية النشاط &nbsp;&nbsp; </span>
+                <i class="bi bi-alarm text-danger me-2"></i>
+              </div>
+
+
             </div>
 
+
             {% if task.status == 'delayed' and task.reason_for_delay %}
-            <div class="alert alert-warning p-2 mb-3">
-              <i class="bi bi-info-circle me-1"></i> <strong>Delay Reason:</strong> {{
+            <div class="alert alert-warning p-2 mb-3" dir="rtl">
+              <i class="bi bi-info-circle me-1"></i> <strong>&nbsp; اسباب التأجيل : &nbsp; </strong> {{
               task.reason_for_delay|truncate(250)
               }}
             </div>
