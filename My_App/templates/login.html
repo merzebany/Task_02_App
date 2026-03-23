@@ -8,7 +8,8 @@
       <div class="text-center mb-4">
         <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center"
           style="width: 70px; height: 70px; font-size: 2rem; font-weight: bold; margin-bottom: 15px;">
-          TF
+          <img src="{{ url_for('static', filename='images/tabarak.png') }}" width="80" height="80"
+            style="border-radius: 3px" />
         </div>
         <h3 class="fw-bold">TaskFlow</h3>
         <p class="text-muted">Team Task Management System</p>
@@ -30,13 +31,25 @@
             <span class="input-group-text"><i class="bi bi-lock"></i></span>
             <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password"
               required>
+            <span class="input-group-text"><i class="bi bi-eye-slash " id="togglePassword"
+                style="cursor: pointer;"></i></span>
+
           </div>
         </div>
 
         <div class="d-grid">
-          <button type="submit" class="btn btn-primary btn-lg">
+
+
+          <button type="submit" class="btn btn-primary btn-lg mb-3">
             <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
           </button>
+
+          <button id="Change_Password_But" class="btn btn-primary btn-sm " type="button" data-bs-placement="top"
+            data-bs-title="Change Password" onclick="Comfirm_password_Fun()">
+            <i class="bi bi-pencil-square me-2"></i> Change Password
+          </button>
+
+
         </div>
 
         <!-- <div class="text-center mt-3">
@@ -50,4 +63,121 @@
     </div>
   </div>
 </div>
+
+
+
+<!-- **********************************************  change password Modal **********************************************-->
+
+<div class="modal fade" id="Change_Password" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+
+    <div class="modal-content">
+
+      <form method="POST" action="{{ url_for('changePassword') }}" style="display:inline;">
+
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Change User Password</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+
+        <div class="modal-body">
+          Are you sure you want to to change your password ?
+
+          <hr>
+          <input type="hidden" name="Old_password" id="Old_password" class="form-control mb-2" value="">
+          <input type="hidden" name="User_Name" id="User_Name" class="form-control mb-2" value="">
+
+          <input type="password" name="New_password" id="New_password" class="form-control mb-2" value=""
+            placeholder="Enter new password" required>
+          <input type="password" name="Comfirm_new_password" id="Comfirm_new_password" class="form-control mb-2"
+            value="" placeholder="Comfirm new password" required>
+          <hr>
+
+        </div>
+
+        <div class="modal-footer">
+
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary"> <i class="fas fa-trash"></i> Change Passord
+          </button>
+          <hr>
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script>
+
+  function Comfirm_password_Fun() {
+
+    let userOldPassword = document.getElementById('password').value;
+    let userName = document.getElementById('username').value;
+
+    if (userOldPassword == '' || userName == '') {
+      window.location.href = '{{ url_for("login") }}';
+    } else {
+
+      fetch("/api/ConfirmforchangePassword", {
+        method: "POST",                // Use POST to send data
+        headers: {
+          "Content-Type": "application/json",  // Tell server it's JSON
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({        // Convert JavaScript object to JSON string
+          old_password: userOldPassword,
+          user_Name: userName
+        })
+      })
+
+        .then(response => response.json())
+        .then(data => {
+
+          if (data.has_Comfirmed) {
+            // Password verified – proceed
+            console.log("Verified!");
+            // Open the modal
+
+            document.getElementById('Old_password').value = userOldPassword;
+            document.getElementById('User_Name').value = userName;
+
+            var myModal = new bootstrap.Modal(document.getElementById('Change_Password'));
+            myModal.show();
+
+          } else {
+            // Show error
+            window.location.href = '{{ url_for("login") }}';
+          }
+        })
+        .catch(error => console.error("Error:", error));
+
+    }
+
+
+  }
+
+  // ********************************************************************************************
+  // ********************************************************************************************
+
+  // Change password from text to password
+  const togglePassword = document.getElementById('togglePassword');
+  const passwordInput = document.getElementById('password');
+
+  togglePassword.addEventListener('click', function () {
+    // Toggle the type attribute
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+
+    // Toggle the icon (optional)
+    this.classList.toggle('bi-eye');
+    this.classList.toggle('bi-eye-slash');
+  });
+
+
+</script>
 {% endblock %}

@@ -255,14 +255,9 @@ def assign_task():
     
       return render_template('assign_task.html', members=members , projects = projects)
 
-
-
-
 # ****************************************************************************************************************
 # ****************************     edit task     ***************************************************************
 # ****************************************************************************************************************
-
-
 @app.route('/EditTask', methods=['GET', 'POST'])
 @login_required
 @leader_required
@@ -319,9 +314,8 @@ def EditTask():
   
 
   return render_template('edit_task.html', tasks=tasks ,members=members ,projects=projects)
+
 # ****************************************************************************************************************
-
-
 # ****************************************************************************************************************
 # ****************************     delete task     ***************************************************************
 # ****************************************************************************************************************
@@ -345,8 +339,6 @@ def delete_task():
   return redirect(url_for('dashboard'))
 
 # ****************************************************************************************************************
-
-
 # ****************************************************************************************************************
 # ****************************     Add User     ******************************************************************
 # ****************************************************************************************************************
@@ -375,7 +367,6 @@ def add_user():
         return redirect(url_for('Team_management'))
 
  return render_template('add_user.html')
-
 
 # ****************************************************************************************************************
 # ****************************     edit User     ******************************************************************
@@ -412,12 +403,9 @@ def EditUser():
 
   return render_template('edit_user.html', users=users)
 
-
 # ****************************************************************************************************************
 # ****************************     delete User     ***************************************************************
 # ****************************************************************************************************************
-
-
 @app.route('/delete_user', methods = ['POST'])
 
 @login_required
@@ -435,9 +423,59 @@ def delete_user():
 
   return redirect(url_for('Team_management'))
 
+
 # ****************************************************************************************************************
+# ****************************************************************************************************************
+# ****************************     Cahnge password  User     *****************************************************
+# ****************************************************************************************************************
+@app.route('/api/ConfirmforchangePassword', methods=['GET', 'POST'])
 
+def ConfirmforchangePassword():
+ 
+  data = request.get_json()  # Parse JSON from request body
+  old_password = data.get('old_password')
+  User_Name_V = data.get('user_Name')
 
+  from DataBase import user_check
+  user_data = user_check(User_Name_V)
+  
+  user = User(user_data)
+       
+        # Simple auth - in production use hashed passwords
+  if user.username.strip() == User_Name_V.strip() and user.password.strip() == old_password.strip():
+      ComfermedPassword =True
+      
+  else :
+      ComfermedPassword =False
+      flash('Invalid username or password', 'danger')
+  return jsonify({'has_Comfirmed': ComfermedPassword})
+    
+# **************************************************************************************
+
+@app.route('/changePassword', methods=['GET', 'POST'])
+
+def changePassword():
+
+ if request.method == 'POST':
+     
+        
+        user_new_password = request.form['New_password']
+        user_comfirm_password = request.form['Comfirm_new_password']
+        User_Name_V= request.form['User_Name']
+        
+        if  user_new_password == user_comfirm_password :
+           
+           from DataBase import Edit_User_Password
+           Edit_User_Password(User_Name_V,user_new_password)
+
+           flash(f'User password changed success !', 'success')
+           return redirect(url_for('login'))
+
+        else :
+            flash(f'New password does not confirmed !', 'danger')
+            return redirect(url_for('login'))
+
+ return render_template('login.html')
 
 # ****************************************************************************************************************
 # ****************************    Search data task filter by member    *******************************************
@@ -476,8 +514,6 @@ def Search_Fun():
 
    search_v = request.args.get('search_v')
 
-   
-   
 #    now = datetime.utcnow()
    now = datetime.now().replace(microsecond=0)   
    if current_user.role == 'leader':
@@ -504,7 +540,6 @@ def Search_Fun():
 # ****************************     Dec task update    ***************************************************************
 # ****************************************************************************************************************
 
-
 @app.route('/DecTask/<int:task_id>/<string:status>', methods=['GET', 'POST'])
 @login_required
 @leader_required
@@ -523,18 +558,14 @@ def DecTask(task_id, status):
       
       return redirect(url_for('dashboard'))
     
-
-
 # ****************************************************************************************************************
 # ****************************     Dec task filter    ************************************************************
 # ****************************************************************************************************************
-
 
 @app.route('/Filter_Ok_Task', methods=['GET', 'POST'])
 @login_required
 @leader_required
 def Filter_Ok_Task():
-
 
    now = datetime.now().replace(microsecond=0)
       
@@ -554,11 +585,9 @@ def Filter_Ok_Task():
          
    return redirect(url_for('dashboard'))
 
-
 # ****************************************************************************************************************
 # ****************************    Team_Management     ************************************************************
 # ****************************************************************************************************************
-
 
 @app.route('/Team_Management', methods=['GET', 'POST'])
 @login_required
@@ -571,12 +600,9 @@ def Team_management():
 
       return render_template('Team.html', users=users)
 
-
-
 # ****************************************************************************************************************
 # ****************************    update              ************************************************************
 # ****************************************************************************************************************
-
 
 @app.route('/task/<int:task_id>/update', methods=['POST'])
 @login_required
@@ -642,8 +668,6 @@ def update_task(task_id):
 # ***********************************************************************************************
 # ***********************************************************************************************
 
-
-
     elif action == 'delay':
         reason = request.form['reason']
         new_deadline_str = request.form['new_deadline']
@@ -704,8 +728,6 @@ def update_task(task_id):
 # ****************************    resolve              ***********************************************************
 # ****************************************************************************************************************
 
-
-
 @app.route('/task/<int:task_id>/resolve', methods=['POST'])
 @login_required
 @leader_required
@@ -731,8 +753,6 @@ def resolve_task(task_id):
         from DataBase import update_Task_status
         update_Task_status(task_id, status, completed_at, requires_leader_attention)
         
-
-
     elif action == 'postpone':
         new_deadline_str = request.form['new_deadline']
         new_deadline = datetime.strptime(new_deadline_str, '%Y-%m-%dT%H:%M')
@@ -749,14 +769,9 @@ def resolve_task(task_id):
    
     return jsonify({'success': True})
 
-
-
-
-
 # ****************************************************************************************************************
 # ****************************           Project   ***************************************************************
 # ****************************************************************************************************************
-
 
 @app.route('/Projects', methods=['GET', 'POST'])
 @login_required
@@ -769,7 +784,6 @@ def Projects():
     
 
       return render_template('Projects.html', Projects=Projects)
-
 
 # ****************************************************************************************************************
 # ****************************     edit Project     **************************************************************
@@ -799,15 +813,10 @@ def EditProject():
 
   return render_template('edit_project.html', projects=Projects)
 
-
-
 # ****************************************************************************************************************
-
-
 # ****************************************************************************************************************
-# ****************************     delete Project     ***************************************************************
+# ****************************     delete Project     ************************************************************
 # ****************************************************************************************************************
-
 
 @app.route('/delete_project', methods = ['POST'])
 
@@ -827,10 +836,8 @@ def delete_project():
   return redirect(url_for('Projects'))
 
 # ****************************************************************************************************************
-
-
 # ****************************************************************************************************************
-# ****************************     Add Project     ******************************************************************
+# ****************************     Add Project     ***************************************************************
 # ****************************************************************************************************************
 
 @app.route('/add_project', methods=['GET', 'POST'])
@@ -854,7 +861,7 @@ def add_project():
 
 
 # ****************************************************************************************************************
-# ****************************    Search data project     ***********************************************************
+# ****************************    Search data project     ********************************************************
 # ****************************************************************************************************************
 
 @app.route('/Search_Data_project', methods=['GET', 'POST'])
@@ -869,16 +876,9 @@ def Search_Projects():
   
    return render_template('Projects.html', Projects=Projects)
    
-
-
-
-
 # ****************************************************************************************************************
 # ****************************   notification system massege    **************************************************
 # ****************************************************************************************************************
-
-
-
 # ****************************************************************************************************************
 # ****************************************************************************************************************
 
@@ -915,8 +915,6 @@ def get_overdue_tasks():
     'status': task['status']
      } for task in overdue_tasks]
    
-
-
 # ******************* sent telegram massege *******************
     
     from DataBase import user_table_tel
@@ -951,10 +949,6 @@ def get_overdue_tasks():
         else:
             error_details.append(response.text)
 
-
-    
-
-    
 #  *********************************************************************
 
     return jsonify(tasks_data)
@@ -987,8 +981,6 @@ def check_notifications():
     
             return jsonify({'has_notifications': task_check_notifications_member_V1})
          
-
-
     return jsonify({'has_notifications': False})
 
 
@@ -998,79 +990,79 @@ def check_notifications():
 
 
 
-@app.route('/api/send-telegram', methods=['GET'])
-@login_required
-@leader_required
+# @app.route('/api/send-telegram', methods=['GET'])
+# @login_required
+# @leader_required
 
-def send_telegram():
+# def send_telegram():
 
-    now = datetime.now().replace(microsecond=0)
+#     now = datetime.now().replace(microsecond=0)
      
-    success_count = 0
-    error_details = []
+#     success_count = 0
+#     error_details = []
    
-    TELEGRAM_BOT_TOKEN = ""
-    TELEGRAM_CHAT_ID = ""
+#     TELEGRAM_BOT_TOKEN = ""
+#     TELEGRAM_CHAT_ID = ""
 
-    if current_user.role == 'leader' :
-         from DataBase import Overdue_Tasks
-         overdue_tasks = Overdue_Tasks(current_user.id, now)
+#     if current_user.role == 'leader' :
+#          from DataBase import Overdue_Tasks
+#          overdue_tasks = Overdue_Tasks(current_user.id, now)
          
 
-    tasks_data = [{
-    'id': task['task_id'],  # ← Use brackets instead of dot notation
-    'title': task['title'],
-    'assigned_to': task['assigned_to_fullname'],
-    'current_deadline': task['current_deadline'].strftime('%b %d, %Y'),
-    'original_deadline': task['original_end_date'].isoformat(),
-    'reason_for_delay': task['reason_for_delay'],
-    'description': task['description'],
-    'projectname': task['project_name'],
-    'status': task['status']
-     } for task in overdue_tasks]
+#     tasks_data = [{
+#     'id': task['task_id'],  # ← Use brackets instead of dot notation
+#     'title': task['title'],
+#     'assigned_to': task['assigned_to_fullname'],
+#     'current_deadline': task['current_deadline'].strftime('%b %d, %Y'),
+#     'original_deadline': task['original_end_date'].isoformat(),
+#     'reason_for_delay': task['reason_for_delay'],
+#     'description': task['description'],
+#     'projectname': task['project_name'],
+#     'status': task['status']
+#      } for task in overdue_tasks]
    
 
-    # text=jsonify(tasks_data)
-    for task in tasks_data:
+#     # text=jsonify(tasks_data)
+#     for task in tasks_data:
       
-      text = (
-             f"اسم المشروع : {task['projectname']}\n"
-             f"العنوان : {task['title']}\n"
-             f"النشاط : {task['description']}\n"
-             f"المسؤول : {task['assigned_to']}\n"
-             f" تاريخ نهو النشاط : {task['current_deadline']}")
+#       text = (
+#              f"اسم المشروع : {task['projectname']}\n"
+#              f"العنوان : {task['title']}\n"
+#              f"النشاط : {task['description']}\n"
+#              f"المسؤول : {task['assigned_to']}\n"
+#              f" تاريخ نهو النشاط : {task['current_deadline']}")
 
-      url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-      payload = {
-        'chat_id': TELEGRAM_CHAT_ID,
-        'text': text,
-        'parse_mode': 'Markdown'  # optional
-        }
-      response = requests.post(url, json=payload)
+#       url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+#       payload = {
+#         'chat_id': TELEGRAM_CHAT_ID,
+#         'text': text,
+#         'parse_mode': 'Markdown'  # optional
+#         }
+#       response = requests.post(url, json=payload)
 
-      if response.status_code == 200:
-            success_count += 1
-      else:
-            error_details.append(response.text)
+#       if response.status_code == 200:
+#             success_count += 1
+#       else:
+#             error_details.append(response.text)
    
     
-    # if response.status_code == 200:
+#     # if response.status_code == 200:
 
-    #     return jsonify({'status': 'sent'}), 200
-    # else:
-    #     return jsonify({'status': 'error', 'details': response.text}), 500
+#     #     return jsonify({'status': 'sent'}), 200
+#     # else:
+#     #     return jsonify({'status': 'error', 'details': response.text}), 500
 
-    # if response.status_code == 200:
+#     # if response.status_code == 200:
 
-    #      flash('Telegram massege was successfully send !', 'success')
-    #      return  redirect(url_for('dashboard'))
-    # else: 
-    #      error_detail = {'details': response.text}
-    #      flash(f'Telegram massege error : {error_detail} !', 'denger')
-    #      return  redirect(url_for('dashboard'))
+#     #      flash('Telegram massege was successfully send !', 'success')
+#     #      return  redirect(url_for('dashboard'))
+#     # else: 
+#     #      error_detail = {'details': response.text}
+#     #      flash(f'Telegram massege error : {error_detail} !', 'denger')
+#     #      return  redirect(url_for('dashboard'))
     
     
-    if success_count == len(tasks_data):
-        return jsonify({'status': 'success', 'message': 'Telegram messages sent!'}), 200
-    else:
-        return jsonify({'status': 'error', 'details': error_details}), 500
+#     if success_count == len(tasks_data):
+#         return jsonify({'status': 'success', 'message': 'Telegram messages sent!'}), 200
+#     else:
+#         return jsonify({'status': 'error', 'details': error_details}), 500

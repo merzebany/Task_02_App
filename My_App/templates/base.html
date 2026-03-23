@@ -94,33 +94,38 @@
           <li class="nav-item">
             <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}"
               href="{{ url_for('dashboard') }}">
-              <i class="bi bi-speedometer2"></i> Dashboard
+              <i class="bi bi-speedometer2 icon_v" data-bs-toggle="tooltip" data-bs-placement="top"
+                data-bs-title="Dashboard"></i> <span class="side_text">Dashboard</span>
             </a>
           </li>
           {% if current_user.role == 'leader' %}
           <li class="nav-item">
             <a class="nav-link {% if request.endpoint == 'assign_task' %}active{% endif %}"
               href="{{ url_for('assign_task') }}">
-              <i class="bi bi-plus-circle"></i> Assign Task
+              <i class="bi bi-plus-circle" data-bs-toggle="tooltip" data-bs-placement="top"
+                data-bs-title="Assign Task"></i> <span class="side_text">Assign Task</span>
             </a>
           </li>
 
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('Team_management') }}">
-              <i class="bi bi-people"></i> Team Management
+              <i class="bi bi-people" data-bs-toggle="tooltip" data-bs-placement="top"
+                data-bs-title="Team Management"></i> <span class="side_text">Team Management</span>
             </a>
           </li>
 
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('Projects') }}">
-              <i class="bi bi-bank"></i> Projects
+              <i class="bi bi-bank" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Projects"></i> <span
+                class="side_text">Projects</span>
             </a>
           </li>
 
           {% endif %}
           <li class="nav-item">
             <a id="notification-bot" class="nav-link" href="#" onclick="Notifications_Fun(event)">
-              <i class="bi bi-bell"></i> Notifications {% if current_user.role
+              <i class="bi bi-bell" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Notifications"></i>
+              <span class="side_text">Notifications</span> {% if current_user.role
               == 'leader' %}
               <span id="notification-badge" class="notification-badge" style="display: none">!</span>
               {% endif %}
@@ -128,7 +133,8 @@
           </li>
           <li class="nav-item mt-4">
             <a class="nav-link" href="{{ url_for('logout') }}">
-              <i class="bi bi-box-arrow-right"></i> Logout
+              <i class="bi bi-box-arrow-right" data-bs-toggle="tooltip" data-bs-placement="top"
+                data-bs-title="Logout"></i> <span class="side_text">Logout</span>
             </a>
           </li>
         </ul>
@@ -138,7 +144,7 @@
       <div class="main-content" style="width: 88%">
         {% with messages = get_flashed_messages(with_categories=true) %} {% if
         messages %} {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        <div class="alert alert-{{ category }} alert-dismissible fade show flash-message" role="alert">
           {{ message }}
           <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
@@ -318,6 +324,29 @@
 
     }
 
+    // **********************************  hide falsh massege **************************************
+
+    // Wait for the DOM to load
+    document.addEventListener('DOMContentLoaded', function () {
+      // Select all elements with class 'flash-message'
+      const flashMessages = document.querySelectorAll('.flash-message');
+      console.log(flashMessages)
+      // Loop through each message
+      flashMessages.forEach(function (message) {
+        // Set a timeout to remove the message after 3 seconds (3000 ms)
+        setTimeout(function () {
+          // Fade out effect (optional) and remove
+          message.style.transition = 'opacity 0.5s ease';
+          message.style.opacity = '0';
+          setTimeout(function () {
+            message.remove();
+          }, 500); // Wait for fade-out to finish
+        }, 3000); // Change 3000 to desired milliseconds (e.g., 5000 = 5 sec)
+      });
+    });
+
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 
   </script>
 

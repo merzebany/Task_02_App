@@ -177,7 +177,10 @@ endblock %}
 
   <!-- ********************************************  table - card  view  ********************************* -->
 
-  <!-- ********************************************  table  view  ********************************* -->
+
+  <!-- ******************************************************************************************** -->
+  <!-- ********************************************  table  view   ******************************** -->
+  <!-- ******************************************************************************************** -->
 
   <div id="table_view" class="card-body p-0 table_view">
     <div class="table-responsive">
@@ -229,20 +232,20 @@ endblock %}
 
               {% elif task.status == 'delayed' and task.current_deadline < now %} <span
                 class="status-badge status-overdue-delayed">
-                <i class="bi bi-clock me-1"></i> Delayed
-                <i class="bi bi-exclamation-lg me-1"></i> Overdue {% elif
+                <i class="bi bi-clock me-1 status-badge-icon"></i> Delayed
+                <i class="bi bi-exclamation-lg me-1 status-badge-icon"></i> Overdue {% elif
                 task.current_deadline < now %} <span class="status-badge status-overdue">
-                  <i class="bi bi-exclamation-lg me-1"></i> Overdue
+                  <i class="bi bi-exclamation-lg me-1 status-badge-icon"></i> Overdue
                   </span>
                   {% elif task.status == 'delayed' %}
                   <span class="status-badge status-delayed">
-                    <i class="bi bi-clock me-1"></i> Delayed
+                    <i class="bi bi-clock me-1 status-badge-icon"></i> Delayed
                   </span>
                   </span>
 
                   {% else %}
                   <span class="status-badge status-pending">
-                    <i class="bi bi-hourglass me-1"></i> Pending
+                    <i class="bi bi-hourglass me-1 status-badge-icon"></i> Pending
                   </span>
 
                   {% endif %}
@@ -636,7 +639,7 @@ endblock %}
 
 <div id="pationation_area" class="container sticky-bottom text-center  mx-auto fw-bold"
   style="position:fixed ; width: 30%;  display: block; ">
-  <div class="row text-center">
+  <div class="row text-center" id="pationation_area_v">
     <div class="col">
       <div class="row">
         <div class="col p-0 text-center">
@@ -819,6 +822,11 @@ endblock %}
     Card_View_check_v.checked = false;
 
   };
+
+
+
+
+
 
 </script>
 

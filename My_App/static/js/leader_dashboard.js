@@ -235,8 +235,38 @@
 
     // Initialize pagination
     generatePagination();
-    displayRows(1); // Display the first page by default
+    displayRows(1);// Display the first page by default
+
+    // const rowsPerPage = document.getElementById('NoOfRowPage');
+   
+    // Check screen size
+   function updateInputValue() {
+      if (window.matchMedia('(max-width: 1700px)').matches) {
+        // Mobile
+        rowsPerPage = 100;
+        
+        generatePagination();
+        displayRows(1);
+
+      } else {
+        
+        rowsPerPage = 5;
+        
+        generatePagination();
+        displayRows(1);
+      }
+    }
+    
+    updateInputValue();
+    // Run on resize
+    window.addEventListener('resize', updateInputValue);
+
   });
+ 
+  
+
+
+
 
 
 //******************************** End Pagintion cal **********************************************
@@ -262,3 +292,8 @@ function Search_Fun() {
 }
 
 
+
+
+
+
+    

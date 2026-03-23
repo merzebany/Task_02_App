@@ -299,3 +299,40 @@
    border-top: none;
    padding: 0.5rem 1.5rem 1.5rem;
  }
+
+ @media (max-width: 2140px) {
+  .side_text{
+    display: none;
+  }
+  .sidebar .nav-link i{
+    font-size: 40px;
+  }
+  .nav-item{
+    text-align: center;
+  }
+
+ 
+ }
+
+ @media (max-width: 1700px) {
+
+  .status-badge-icon {
+      display: none;
+    }
+
+
+  #pationation_area_v{
+    display: none;
+  }
+
+#table_view{
+
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 62vh
+}
+
+   
+
+ }
+
