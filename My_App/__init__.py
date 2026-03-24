@@ -6,7 +6,8 @@ from datetime import datetime, timedelta
 from functools import wraps
 import requests
 from flask_login import UserMixin
-
+import time
+ 
 import os
 
 
@@ -601,7 +602,7 @@ def Team_management():
       return render_template('Team.html', users=users)
 
 # ****************************************************************************************************************
-# ****************************    update              ************************************************************
+# ****************************    update task  from user           ************************************************************
 # ****************************************************************************************************************
 
 @app.route('/task/<int:task_id>/update', methods=['POST'])
@@ -725,7 +726,7 @@ def update_task(task_id):
     return redirect(url_for('dashboard'))
 
 # ****************************************************************************************************************
-# ****************************    resolve              ***********************************************************
+# ****************************    resolve  from leader             ***********************************************************
 # ****************************************************************************************************************
 
 @app.route('/task/<int:task_id>/resolve', methods=['POST'])
@@ -914,9 +915,9 @@ def get_overdue_tasks():
     'projectname': task['project_name'],
     'status': task['status']
      } for task in overdue_tasks]
-   
+       
 # ******************* sent telegram massege *******************
-    
+    error_massege = None
     from DataBase import user_table_tel
 
     users = user_table_tel(current_user.id)
@@ -926,33 +927,42 @@ def get_overdue_tasks():
       TELEGRAM_BOT_TOKEN = users['user_telegram_TOKEN']
       TELEGRAM_CHAT_ID = users['user_telegram_CHAT_ID']
 
-      for task in tasks_data:
+      for task in overdue_tasks:
       
         text = (
              f"نشاط متاخر\n"
-             f"اسم المشروع : {task['projectname']}\n"
+             f"اسم المشروع : {task['project_name']}\n"
              f"العنوان : {task['title']}\n"
              f"النشاط : {task['description']}\n"
-             f"المسؤول : {task['assigned_to']}\n"
-             f" تاريخ نهو النشاط : {task['current_deadline']}")
-
+             f"المسؤول : {task['assigned_to_fullname']}\n"
+             f" تاريخ نهو النشاط : {task['current_deadline'].strftime('%b %d, %Y')}")
+        print(text)
         url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
         payload = {
         'chat_id': TELEGRAM_CHAT_ID,
         'text': text,
         'parse_mode': 'Markdown'  # optional
         }
-        response = requests.post(url, json=payload)
-
-        if response.status_code == 200:
-            success_count += 1
-        else:
-            error_details.append(response.text)
-
+        try:
+            response = requests.post(url, json=payload, timeout=10)
+            if response.status_code != 200:
+                error_massege = response.text
+                print(f"Error response: {response.text}")
+                
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            # Optionally break or continue
+            continue
+        
 #  *********************************************************************
 
-    return jsonify(tasks_data)
-
+    # return jsonify(tasks_data)
+      if error_massege == None :
+       return jsonify({'tasks_data': tasks_data,
+                     'error_massege': None})
+      else :
+        return jsonify({'tasks_data': tasks_data,
+                     'error_massege': error_massege})
 # ****************************************************************************************************************
 # ***********************************  check-notifications  ******************************************************
 

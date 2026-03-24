@@ -225,11 +225,12 @@
       })
 
         .then((response) => response.json())
-        .then((tasks) => {
+        .then((data) => {
           const container = document.getElementById("notification-container");
           container.innerHTML = "";
 
-
+          let tasks = data.tasks_data;
+          let errors = data.error_massege;
 
           tasks.forEach((task) => {
             // Create notification element
@@ -282,7 +283,14 @@
               }
             }
           });
+
+
+          if (errors.length > 0) {
+            alert(`Failed to send Telegram notification for task :\n${errors}`);
+          }
+
         })
+
         .catch((error) =>
           console.error("Error fetching overdue tasks:", error),
         );
@@ -330,7 +338,7 @@
     document.addEventListener('DOMContentLoaded', function () {
       // Select all elements with class 'flash-message'
       const flashMessages = document.querySelectorAll('.flash-message');
-      console.log(flashMessages)
+
       // Loop through each message
       flashMessages.forEach(function (message) {
         // Set a timeout to remove the message after 3 seconds (3000 ms)

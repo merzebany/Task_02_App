@@ -230,10 +230,14 @@ endblock %}
                 <i class="bi bi-check-lg me-1"></i> Completed
               </span>
 
-              {% elif task.status == 'delayed' and task.current_deadline < now %} <span
-                class="status-badge status-overdue-delayed">
-                <i class="bi bi-clock me-1 status-badge-icon"></i> Delayed
-                <i class="bi bi-exclamation-lg me-1 status-badge-icon"></i> Overdue {% elif
+              {% elif
+              task.status == 'delayed' and task.current_deadline < now %} <span
+                class="status-badge status-overdue-delayed mb-2">
+                <i class="bi bi-clock me-1 status-badge-icon "></i> Delayed</span>
+                <hr>
+                <span class="status-badge status-overdue-delayed">
+                  <i class="bi bi-exclamation-lg me-1 status-badge-icon"></i> Overdue </span>
+                {% elif
                 task.current_deadline < now %} <span class="status-badge status-overdue">
                   <i class="bi bi-exclamation-lg me-1 status-badge-icon"></i> Overdue
                   </span>
