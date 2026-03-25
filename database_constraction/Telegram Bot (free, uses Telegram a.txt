@@ -1,0 +1,8 @@
+Telegram Bot (free, uses Telegram app)
+If you use Telegram, you can create a bot that sends messages directly to your Telegram account.
+
+Steps:
+
+Create a bot: talk to @BotFather on Telegram, send /newbot, get a token.
+
+Find your chat ID: send a message to your bot, then visit https://api.telegram.org/bot<YOUR_TOKEN>/getUpdates to see your chat ID.

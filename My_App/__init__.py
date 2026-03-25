@@ -249,14 +249,14 @@ def assign_task():
         
 
 
-            # **************************************
+# *************************************************************************************************************
 
         flash(f'Task "{title}" assigned successfully!', 'success')
         return redirect(url_for('dashboard'))
     
       return render_template('assign_task.html', members=members , projects = projects)
 
-# ****************************************************************************************************************
+# **************************************************************************************************************
 # ****************************     edit task     ***************************************************************
 # ****************************************************************************************************************
 @app.route('/EditTask', methods=['GET', 'POST'])
@@ -891,76 +891,173 @@ def get_overdue_tasks():
     now = datetime.now().replace(microsecond=0)
 
 
-    success_count = 0
-    error_details = []
-
-
     if current_user.role == 'leader' :
+         
          from DataBase import Overdue_Tasks
          overdue_tasks = Overdue_Tasks(current_user.id, now)
-         
 
+         tasks_data = [{
+         'id': task['task_id'],  # ← Use brackets instead of dot notation
+         'title': task['title'],
+         'assigned_to': task['assigned_to_fullname'],
+         'assigned_to_id': task['assigned_to_user_id'],
+         'current_deadline': task['current_deadline'].strftime('%b %d, %Y'),
+         'original_deadline': task['original_end_date'].strftime('%b %d, %Y'),
+         'reason_for_delay': task['reason_for_delay'],
+         'description': task['description'],
+         'projectname': task['project_name'],
+         'status': task['status']
+          } for task in overdue_tasks]
+       
+# ******************* sent telegram massege all user to leder  *******************
+         error_massege = None
+
+         from DataBase import user_table_tel
+         users = user_table_tel(current_user.id)
+    
+         if  users['user_telegram_OK'] == True and  users['user_telegram_TOKEN'] !=None  and users['user_telegram_CHAT_ID'] != None :
+      
+            TELEGRAM_BOT_TOKEN = users['user_telegram_TOKEN']
+            TELEGRAM_CHAT_ID = users['user_telegram_CHAT_ID']
+
+         for task in tasks_data:
+      
+           text = (
+             f"نشاط متاخر\n"
+             f"اسم المشروع : {task['projectname']}\n"
+             f"العنوان : {task['title']}\n"
+             f"النشاط : {task['description']}\n"
+             f"المسؤول : {task['assigned_to']}\n"
+             f" تاريخ نهو النشاط : {task['current_deadline']}")
+            
+            
+           url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+           payload = {
+             'chat_id': TELEGRAM_CHAT_ID,
+             'text': text,
+             'parse_mode': 'Markdown'  # optional
+              }
+
+           try:
+              response = requests.post(url, json=payload, timeout=10)
+              if response.status_code != 200:
+                error_massege = response.text
+                print(f"Error response: {response.text}")
+                
+              response.raise_for_status()
+
+           except requests.exceptions.RequestException as e:
+            # Optionally break or continue
+            continue
+           
+
+
+# ******************* sent telegram massege to all user to his acount  *******************
+         error_massege = None
+
+         for task in tasks_data:
+           
+           from DataBase import user_table_tel
+           users = user_table_tel(task['assigned_to_id'])
+    
+           if  users['user_telegram_OK'] == True and  users['user_telegram_TOKEN'] !=None  and users['user_telegram_CHAT_ID'] != None :
+      
+            TELEGRAM_BOT_TOKEN = users['user_telegram_TOKEN']
+            TELEGRAM_CHAT_ID = users['user_telegram_CHAT_ID']
+
+           text = (
+             f"نشاط متاخر\n"
+             f"اسم المشروع : {task['projectname']}\n"
+             f"العنوان : {task['title']}\n"
+             f"النشاط : {task['description']}\n"
+             f"المسؤول : {task['assigned_to']}\n"
+             f" تاريخ نهو النشاط : {task['current_deadline']}")
+            
+            
+           url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+           payload = {
+             'chat_id': TELEGRAM_CHAT_ID,
+             'text': text,
+             'parse_mode': 'Markdown'  # optional
+              }
+
+           try:
+              response = requests.post(url, json=payload, timeout=10)
+              if response.status_code != 200:
+                error_massege = response.text
+                print(f"Error response: {response.text}")
+                
+              response.raise_for_status()
+
+           except requests.exceptions.RequestException as e:
+            # Optionally break or continue
+            continue        
+           
+#  ********************************************************************* 
+        
     elif current_user.role == 'member' :
          from DataBase import Overdue_Tasks_Member
          overdue_tasks = Overdue_Tasks_Member(current_user.id, now)
 
-    tasks_data = [{
-    'id': task['task_id'],  # ← Use brackets instead of dot notation
-    'title': task['title'],
-    'assigned_to': task['assigned_to_fullname'],
-    'current_deadline': task['current_deadline'].strftime('%b %d, %Y'),
-    'original_deadline': task['original_end_date'].strftime('%b %d, %Y'),
-    'reason_for_delay': task['reason_for_delay'],
-    'description': task['description'],
-    'projectname': task['project_name'],
-    'status': task['status']
-     } for task in overdue_tasks]
+         tasks_data = [{
+              'id': task['task_id'],  # ← Use brackets instead of dot notation
+              'title': task['title'],
+              'assigned_to': task['assigned_to_fullname'],
+              'current_deadline': task['current_deadline'].strftime('%b %d, %Y'),
+              'original_deadline': task['original_end_date'].strftime('%b %d, %Y'),
+              'reason_for_delay': task['reason_for_delay'],
+              'description': task['description'],
+              'projectname': task['project_name'],
+              'status': task['status']
+               } for task in overdue_tasks]
        
 # ******************* sent telegram massege *******************
-    error_massege = None
-    from DataBase import user_table_tel
-
-    users = user_table_tel(current_user.id)
+         error_massege = None
+         from DataBase import user_table_tel
+   
+         users = user_table_tel(current_user.id)
     
-    if  users['user_telegram_OK'] == True and  users['user_telegram_TOKEN'] !=None  and users['user_telegram_CHAT_ID'] != None :
+         if  users['user_telegram_OK'] == True and  users['user_telegram_TOKEN'] !=None  and users['user_telegram_CHAT_ID'] != None :
       
-      TELEGRAM_BOT_TOKEN = users['user_telegram_TOKEN']
-      TELEGRAM_CHAT_ID = users['user_telegram_CHAT_ID']
+           TELEGRAM_BOT_TOKEN = users['user_telegram_TOKEN']
+           TELEGRAM_CHAT_ID = users['user_telegram_CHAT_ID']
 
-      for task in overdue_tasks:
+         for task in tasks_data:
       
-        text = (
+           text = (
              f"نشاط متاخر\n"
-             f"اسم المشروع : {task['project_name']}\n"
+             f"اسم المشروع : {task['projectname']}\n"
              f"العنوان : {task['title']}\n"
              f"النشاط : {task['description']}\n"
-             f"المسؤول : {task['assigned_to_fullname']}\n"
-             f" تاريخ نهو النشاط : {task['current_deadline'].strftime('%b %d, %Y')}")
-        print(text)
-        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-        payload = {
+             f"المسؤول : {task['assigned_to']}\n"
+             f" تاريخ نهو النشاط : {task['current_deadline']}")
+            
+            
+           url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+           payload = {
         'chat_id': TELEGRAM_CHAT_ID,
         'text': text,
         'parse_mode': 'Markdown'  # optional
         }
-        try:
+
+           try:
             response = requests.post(url, json=payload, timeout=10)
             if response.status_code != 200:
                 error_massege = response.text
                 print(f"Error response: {response.text}")
                 
             response.raise_for_status()
-        except requests.exceptions.RequestException as e:
+           except requests.exceptions.RequestException as e:
             # Optionally break or continue
             continue
         
 #  *********************************************************************
 
     # return jsonify(tasks_data)
-      if error_massege == None :
+    if error_massege == None :
        return jsonify({'tasks_data': tasks_data,
                      'error_massege': None})
-      else :
+    else :
         return jsonify({'tasks_data': tasks_data,
                      'error_massege': error_massege})
 # ****************************************************************************************************************
