@@ -16,10 +16,10 @@
   <div class="card-body p-0">
     <div class="table-responsive">
 
-      <table class="table table-hover mb-0">
+      <table class="table table-hover mb-0" dir="rtl">
         <thead class="table-light">
           <tr>
-            <th class="text-center">User_ID</th>
+            <!-- <th class="text-center">User_ID</th> -->
             <th class="text-center">User Name</th>
             <th class="text-center">password</th>
             <th class="text-center">role</th>
@@ -30,7 +30,7 @@
         <tbody>
           {% for user in users %}
           <tr class="task-row" data-status="{{ user.role }}">
-            <td class="text-center">{{ user.user_id }}</td>
+            <!-- <td class="text-center">{{ user.user_id }}</td> -->
             <td class="text-center">{{ user.username }}</td>
             <td class="text-center">{{ user.password }}</td>
             <td class="text-center">{{ user.role }}</td>

@@ -1056,7 +1056,7 @@ def get_overdue_tasks():
     # return jsonify(tasks_data)
     if error_massege == None :
        return jsonify({'tasks_data': tasks_data,
-                     'error_massege': None})
+                     'error_massege': False})
     else :
         return jsonify({'tasks_data': tasks_data,
                      'error_massege': error_massege})

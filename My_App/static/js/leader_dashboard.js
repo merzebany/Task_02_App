@@ -250,24 +250,120 @@
 
       } else {
         
-        rowsPerPage = 5;
+        rowsPerPage = 6;
         
         generatePagination();
         displayRows(1);
       }
     }
-    
+
+   
+  
     updateInputValue();
     // Run on resize
     window.addEventListener('resize', updateInputValue);
 
+
+  const scrollPageBtn = document.getElementById("scrollPageBtn");
+
+    // Define Scroll_page_Fun inside the same scope
+    
+    function Scroll_page_Fun() {
+
+      const pationationArea = document.getElementById("pationation_area");
+      const tableView = document.getElementById("table_view");
+      const icon_v01 = document.getElementById("icon_v01");
+      const viewStatus = scrollPageBtn.getAttribute("data-view-status");
+
+      if (viewStatus === "noneScroll") {
+        
+        pationationArea.style.display = 'none';
+        tableView.style.overflowY = 'auto';    // corrected property name
+        tableView.style.overflowX = 'hidden';
+        tableView.style.maxHeight = '60vh';
+        scrollPageBtn.removeAttribute('data-view-status');
+        scrollPageBtn.setAttribute("data-view-status", "Scroll");
+        icon_v01.classList.remove("bi-chevron-bar-expand");
+        icon_v01.classList.add("bi-chevron-bar-contract");
+        localStorage.setItem("scroll_Paging", "yes")
+
+        rowsPerPage = 100;
+        generatePagination();
+        displayRows(1);
+
+      } else {
+
+        pationationArea.style.display = 'block';
+        tableView.style.overflowY = 'hidden';   
+        tableView.style.overflowX = 'hidden';
+        tableView.style.maxHeight = '60vh';
+        scrollPageBtn.removeAttribute('data-view-status');
+        scrollPageBtn.setAttribute("data-view-status", "noneScroll");
+        icon_v01.classList.remove("bi-chevron-bar-contract");
+        icon_v01.classList.add("bi-chevron-bar-expand");
+        localStorage.setItem("scroll_Paging", "no") 
+
+        rowsPerPage = 6;
+        generatePagination();
+        displayRows(1);
+      }
+
+  }
+
+  // Attach the click event
+  if (scrollPageBtn) {
+    scrollPageBtn.addEventListener('click', function (event) {
+         // prevent the anchor from navigating
+      Scroll_page_Fun();
+    });
+    }
+    
+    if (localStorage.getItem("scroll_Paging") === "yes") {
+    
+      const pationationArea = document.getElementById("pationation_area");
+      const tableView = document.getElementById("table_view");
+      const icon_v01 = document.getElementById("icon_v01");
+      
+    
+        pationationArea.style.display = 'none';
+        tableView.style.overflowY = 'auto';    // corrected property name
+        tableView.style.overflowX = 'hidden';
+        tableView.style.maxHeight = '60vh';
+        scrollPageBtn.removeAttribute('data-view-status');
+        scrollPageBtn.setAttribute("data-view-status", "Scroll");
+        icon_v01.classList.remove("bi-chevron-bar-expand");
+        icon_v01.classList.add("bi-chevron-bar-contract");
+        
+        rowsPerPage = 100;
+        generatePagination();
+        displayRows(1);
+    
+    } else if (localStorage.getItem("scroll_Paging") === "no") {
+      
+        const pationationArea = document.getElementById("pationation_area");
+        const tableView = document.getElementById("table_view");
+        const icon_v01 = document.getElementById("icon_v01");
+      
+    
+
+    
+       pationationArea.style.display = 'block';
+        tableView.style.overflowY = 'hidden';   
+        tableView.style.overflowX = 'hidden';
+        tableView.style.maxHeight = '60vh';
+        scrollPageBtn.removeAttribute('data-view-status');
+        scrollPageBtn.setAttribute("data-view-status", "noneScroll");
+        icon_v01.classList.remove("bi-chevron-bar-contract");
+        icon_v01.classList.add("bi-chevron-bar-expand");
+        localStorage.setItem("scroll_Paging", "no") 
+
+        rowsPerPage = 6;
+        generatePagination();
+        displayRows(1);
+    }
+    
   });
  
-  
-
-
-
-
 
 //******************************** End Pagintion cal **********************************************
 
@@ -290,7 +386,6 @@ function Search_Fun() {
     window.location.href = "/Search_Data?search_v=" + Search_V
   }
 }
-
 
 
 

@@ -95,7 +95,8 @@
             <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}"
               href="{{ url_for('dashboard') }}">
               <i class="bi bi-speedometer2 icon_v" data-bs-toggle="tooltip" data-bs-placement="top"
-                data-bs-title="Dashboard"></i> <span class="side_text">Dashboard</span>
+                data-bs-title="Dashboard"></i>
+              <span class="side_text">Dashboard</span>
             </a>
           </li>
           {% if current_user.role == 'leader' %}
@@ -131,6 +132,9 @@
               {% endif %}
             </a>
           </li>
+
+
+
           <li class="nav-item mt-4">
             <a class="nav-link" href="{{ url_for('logout') }}">
               <i class="bi bi-box-arrow-right" data-bs-toggle="tooltip" data-bs-placement="top"
@@ -138,6 +142,23 @@
             </a>
           </li>
         </ul>
+
+
+        <ul class="nav flex-column px-3" style="position:fixed; bottom: 10px; " id="nav_scrollPageBtn">
+
+          <li class="nav-item">
+
+            <a class="nav-link" href="#" id="scrollPageBtn" data-view-status="noneScroll" style="color:darkgreen;">
+              <i class="bi bi-chevron-bar-expand icon_v" id="icon_v01" data-bs-toggle="tooltip" data-bs-placement="top"
+                data-bs-title="scroll page"></i>
+              <span class="side_text">Scroll page</span>
+            </a>
+
+          </li>
+
+        </ul>
+
+
       </div>
 
       <!-- Main Content -->
@@ -166,8 +187,8 @@
       // Check for notifications periodically
       // checkNotifications();
 
-      setInterval(checkNotifications, 600000); // Check every 10 min seconds
-
+      // setInterval(checkNotifications, 600000); // Check every 10 min seconds
+      setTimeout(checkNotifications, 600000);
 
       // Initialize notification permission
       if (
@@ -213,6 +234,7 @@
         .catch((error) =>
           console.error("Error checking notifications:", error),
         );
+      setTimeout(checkNotifications, 1800000);
     }
 
     function showOverdueNotifications() {
@@ -245,7 +267,8 @@
                                                   <p><strong>${task.title}</strong></p>
                                                   <p><strong>${task.description}</strong></p>
                                                   <p><strong>${task.projectname}</strong></p>
-                                                  <p>المسؤول  : ${task.assigned_to}<br>Deadline passed: ${formatDate(task.current_deadline)}</p>
+                                                  <p>المسؤول  : ${task.assigned_to}<br>
+                                                   ${formatDate(task.current_deadline)} : تاريخ نهاية النشاط </p>
                                               </div>
                                           `;
 
@@ -284,9 +307,13 @@
             }
           });
 
+          if (errors == false) {
 
-          if (errors.length > 0) {
-            alert(`Failed to send Telegram notification for task :\n${errors}`);
+          } else {
+            if (errors.length > 0) {
+              alert(`Failed to send Telegram notification for task :\n${errors}`);
+            }
+
           }
 
         })
@@ -355,6 +382,11 @@
 
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
+
+
+
+
 
   </script>
 

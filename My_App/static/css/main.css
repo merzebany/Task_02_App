@@ -301,6 +301,7 @@
  }
 
  @media (max-width: 2140px) {
+
   .side_text{
     display: none;
   }
@@ -311,17 +312,22 @@
     text-align: center;
   }
 
- 
+#nav_scrollPageBtn {
+  
+      left: 30px;
+      position:absolute;
+ }
+
  }
 
  @media (max-width: 1700px) {
 
-  .status-badge-icon {
+.status-badge-icon {
       display: none;
     }
 
 
-  #pationation_area_v{
+#pationation_area_v{
     display: none;
   }
 
@@ -329,10 +335,13 @@
 
   overflow-y: auto;
   overflow-x: hidden;
-  max-height: 62vh
+  max-height: 62vh;
+  position: relative;
+
 }
 
-   
-
+#scrollPageBtn{
+  display: none;
  }
 
+}
