@@ -152,7 +152,12 @@ endblock %}
       </button>
     </form>
 
-
+    <div>
+      <button id="Filter_But" class="btn btn-sm btn-outline-danger  Filter_But" type="button" data-bs-placement="top"
+        data-bs-title="Filter Task" data-bs-toggle="modal" data-bs-target="#FilterModal">
+        <i class="bi bi-funnel"></i> Filter
+      </button>
+    </div>
 
 
     <div class="btn-group">
@@ -189,21 +194,24 @@ endblock %}
         <thead style="position: sticky; top: 0;z-index: 1;">
           <tr style="background: #90AB8B; position: sticky; top: 0;z-index: 1;">
 
+            <th class="text-center" style="background: #90AB8B; width: 2%;">#</th>
             <th style="background: #90AB8B; width: 20%;">النشاط</th>
-            <th class="text-center" style="background: #90AB8B; width: 15%;">المشروع</th>
+            <th class="text-center" style="background: #90AB8B; width: 14%;">المشروع</th>
             <th class="text-center" style="background: #90AB8B; width: 10%; ">المسؤول</th>
             <th class="text-center" style="background: #90AB8B; width: 10%; ">تاريخ البدية</th>
             <th class="text-center" style="background: #90AB8B; width: 10%; ">تاريخ النهاية</th>
             <th class="text-center" style="background: #90AB8B; width: 8%; ">الحالة</th>
             <th class="text-center" style="background: #90AB8B; width: 6%; ">Resolve</th>
-            <th class="text-center" style="background: #90AB8B; width: 15%; ">Actions</th>
+            <th class="text-center" style="background: #90AB8B; width: 14%; ">Actions</th>
             <th class="text-center" style="background: #90AB8B; width: 6%; ">OK.</th>
 
           </tr>
         </thead>
         <tbody>
           {% for task in tasks %}
+
           <tr class="task-row" data-status="{{ task.status }}">
+            <td class="text-center">{{ loop.index }}</td>
             <td>
               <div class="fw-bold mb-2">{{ task.title }}</div>
               <div class="text-muted small mb-2">
@@ -359,7 +367,9 @@ endblock %}
                 <h5 class="text-muted mb-0">{{ task.assigned_to_fullname }}</h5>
               </div>
 
-              <div>
+              <div
+                style="border: solid; border-radius: 50%; width: 32px; height: 32px; text-align: center; align-items:center">
+                {{ loop.index }}
               </div>
 
             </div>
@@ -642,6 +652,70 @@ endblock %}
 </div>
 
 
+<!-- **********************************************  Filter Modal **********************************************-->
+
+<div class="modal fade" id="FilterModal" tabindex="-1" aria-labelledby="FilterModal" aria-hidden="true">
+  <div class="modal-dialog">
+
+    <div class="modal-content">
+
+      <form method="POST" action="{{ url_for('Filter_Advance') }}" style="display:inline;">
+
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Filter Task</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+
+        <div class="modal-body">
+          Choose Filter Prameter
+
+          <hr>
+
+          <label for="Project_V" class="form-label fw-bold">Project</label>
+          <select class="form-select" id="Project_V" name="Project_V" dir="rtl">
+            <option value="">اختار اسم المشروع .....</option>
+            {% for project in projects %}
+            <option value="{{ project.project_id }}"> {{ project.project_name }}</option>
+            {% endfor %}
+          </select>
+          <div id="modalbody" dir="rtl"></div>
+          <hr>
+
+          <label for="assigned_to" class="form-label fw-bold">Assign To</label>
+          <select class="form-select" id="assigned_to" name="assigned_to" dir="rtl">
+            <option value="">اختار المسؤول عن النشاط .....</option>
+            {% for member in members %}
+            <option value="{{ member.user_id }}"> {{ member.full_name }} ({{ member.username }})</option>
+            {% endfor %}
+          </select>
+
+          <hr>
+
+          <label for="end_date" class="form-label fw-bold">End Date (Deadline) Between</label>
+          <input type="datetime-local" class="form-control mb-3" id="from_end_date" name="from_end_date">
+          <input type="datetime-local" class="form-control" id="to_end_date" name="to_end_date">
+          <hr>
+
+
+        </div>
+
+        <div class="modal-footer">
+
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary"> <i class="fas fa-trash"></i> Apply Filter
+          </button>
+          <hr>
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+</div>
+
+
 <!--  ***************************** Pationation Area ********************************************** -->
 <div class="d-flex flex-row justify-content-between align-items-center sticky-bottom text-center  mx-auto fw-bold"
   style="position:fixed ; width: 80%;  display: block; ">
@@ -751,25 +825,39 @@ endblock %}
   let Table_View_v = document.getElementById('table_view');
   let Card_View_v = document.getElementById('card_view');
   let pationation_area_v = document.getElementById('pationation_area');
-
+  let scrollPageBtn_v = document.getElementById('scrollPageBtn');
   // Add an event listener to the checkbox
 
   Table_View_check_v.addEventListener('change', () => {
+
     if (Table_View_check_v.checked) {
 
       Table_View_v.style.display = 'block'; // Show the element
-      pationation_area_v.style.display = 'block';
+
+      if (localStorage.getItem("scroll_Paging") === "no") {
+        pationation_area_v.style.display = 'block';
+      } else {
+        pationation_area_v.style.display = 'none';
+      }
+
       Card_View_v.style.display = 'none';
       Card_View_check_v.checked = false;
+      scrollPageBtn_v.style.display = 'block';
 
       localStorage.setItem("Table_View_local", "Yes")
       localStorage.setItem("Card_View_local", "No")
     } else {
 
       Table_View_v.style.display = 'none';
-      pationation_area_v.style.display = 'none';  // Show the element
+      if (localStorage.getItem("scroll_Paging") === "no") {
+        pationation_area_v.style.display = 'block';
+      } else {
+        pationation_area_v.style.display = 'none';
+      }  // Show the element
       Card_View_v.style.display = 'block';
       Card_View_check_v.checked = true;
+      scrollPageBtn_v.style.display = 'none';
+
       localStorage.setItem("Table_View_local", "No")
       localStorage.setItem("Card_View_local", "Yes")
 
@@ -785,8 +873,12 @@ endblock %}
 
       Card_View_v.style.display = 'block';  // Show the element
       Table_View_v.style.display = 'none';
+
       pationation_area_v.style.display = 'none';
+
       Table_View_check_v.checked = false;
+      scrollPageBtn_v.style.display = 'none';
+
       localStorage.setItem("Table_View_local", "No")
       localStorage.setItem("Card_View_local", "Yes")
 
@@ -794,8 +886,14 @@ endblock %}
 
       Card_View_v.style.display = 'none';  // Show the element
       Table_View_v.style.display = 'block';
-      pationation_area_v.style.display = 'block';
+      if (localStorage.getItem("scroll_Paging") === "no") {
+        pationation_area_v.style.display = 'block';
+      } else {
+        pationation_area_v.style.display = 'none';
+      }
       Table_View_check_v.checked = true;
+      scrollPageBtn_v.style.display = 'block';
+
       localStorage.setItem("Table_View_local", "Yes")
       localStorage.setItem("Card_View_local", "No")
 
@@ -807,8 +905,14 @@ endblock %}
 
     Card_View_v.style.display = 'none';  // Show the element
     Table_View_v.style.display = 'block';
-    pationation_area_v.style.display = 'block';
+    if (localStorage.getItem("scroll_Paging") === "no") {
+      pationation_area_v.style.display = 'block';
+    } else {
+      pationation_area_v.style.display = 'none';
+    }
     Table_View_check_v.checked = true;
+    scrollPageBtn_v.style.display = 'block';
+
 
   } else {
 
@@ -816,6 +920,7 @@ endblock %}
     Table_View_v.style.display = 'none';
     pationation_area_v.style.display = 'none';
     Table_View_check_v.checked = false;
+    scrollPageBtn_v.style.display = 'none';
 
   };
 
@@ -825,22 +930,52 @@ endblock %}
     Table_View_v.style.display = 'none';
     pationation_area_v.style.display = 'none';
     Card_View_check_v.checked = true;
+    scrollPageBtn_v.style.display = 'none';
 
   } else {
 
     Card_View_v.style.display = 'none';  // Show the element
     Table_View_v.style.display = 'block';
-    pationation_area_v.style.display = 'block';
+    if (localStorage.getItem("scroll_Paging") === "no") {
+      pationation_area_v.style.display = 'block';
+    } else {
+      pationation_area_v.style.display = 'none';
+    }
     Card_View_check_v.checked = false;
+    scrollPageBtn_v.style.display = 'block';
 
   };
 
 
 
+</script>
 
+<script>
+
+
+  // Get the modal element (adjust the selector if needed)
+  let filterModal = document.getElementById('FilterModal');
+  let modalbody_v = document.getElementById('modalbody')
+  // When the modal is fully shown, initialize TomSelect
+  filterModal.addEventListener('shown.bs.modal', function () {
+    // Get the select element
+    let projectSelect = document.getElementById('Project_V');
+
+    // Check if TomSelect is already initialized on this element
+    if (projectSelect.tomselect) {
+      projectSelect.tomselect.destroy(); // destroy existing instance
+    }
+
+    // Initialize TomSelect
+    new TomSelect(projectSelect, {
+      placeholder: 'اختار اسم المشروع .....',
+      searchField: ['text'],
+      create: false,
+      dropdownParent: modalbody_v,
+      maxOptions: 1000
+    });
+  });
 
 
 </script>
-
-
 {% endblock %}

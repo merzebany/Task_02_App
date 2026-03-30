@@ -136,12 +136,22 @@ def login():
     
     return render_template('login.html')
 
+#**************************************************************************************************************
+#*******************************     login   -   logout            ********************************************
+#**************************************************************************************************************
+
+
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     flash('You have been logged out', 'info')
     return redirect(url_for('login'))
+
+
+#**************************************************************************************************************
+#*******************************    dashboard                      ********************************************
+#**************************************************************************************************************
 
 @app.route('/')
 @login_required
@@ -158,6 +168,9 @@ def dashboard():
           
           from DataBase import user_member
           members = user_member()
+          
+          from DataBase import project_table
+          projects = project_table()
 
           from DataBase import Overdue_Tasks
           Overdue_Tasks_V = Overdue_Tasks(current_user.id,now)
@@ -170,7 +183,7 @@ def dashboard():
         #       Task_data['formatted_current_deadline'] = 'No deadline'
 
           
-          return render_template('leader_dashboard.html', tasks=Task_data, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V)
+          return render_template('leader_dashboard.html', tasks=Task_data, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V, projects = projects)
       else:
           from DataBase import Task_assigned_to_CurrentUser
           Task_data = Task_assigned_to_CurrentUser(current_user.id)
@@ -498,11 +511,14 @@ def Filter_Data_ByMember():
    from DataBase import user_member
    members = user_member()
 
+   from DataBase import project_table
+   projects = project_table()
+
    from DataBase import Overdue_Tasks
    Overdue_Tasks_V = Overdue_Tasks(current_user.id,now)
 
           
-   return render_template('leader_dashboard.html', tasks=Task_data, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V)
+   return render_template('leader_dashboard.html', tasks=Task_data, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V, projects = projects)
    
 # ****************************************************************************************************************
 # ****************************    Search data task     ***********************************************************
@@ -525,11 +541,14 @@ def Search_Fun():
           from DataBase import user_member
           members = user_member()
 
+          from DataBase import project_table
+          projects = project_table()
+
           from DataBase import Overdue_Tasks
           Overdue_Tasks_V = Overdue_Tasks(current_user.id,now)
-
+          print(now)
           
-          return render_template('leader_dashboard.html', tasks=Filter_tasks_V, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V)
+          return render_template('leader_dashboard.html', tasks=Filter_tasks_V, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V,projects = projects)
    else:
           from DataBase import Task_assigned_to_CurrentUser
           Task_data = Task_assigned_to_CurrentUser(current_user.id)
@@ -578,11 +597,14 @@ def Filter_Ok_Task():
           from DataBase import user_member
           members = user_member()
 
+          from DataBase import project_table
+          projects = project_table()
+   
           from DataBase import Overdue_Tasks_Filter_Ok
           Overdue_Tasks_V = Overdue_Tasks_Filter_Ok(current_user.id)
 
 
-          return render_template('leader_dashboard.html', tasks=Task_data, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V)
+          return render_template('leader_dashboard.html', tasks=Task_data, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V, projects = projects)
          
    return redirect(url_for('dashboard'))
 
@@ -1089,6 +1111,53 @@ def check_notifications():
             return jsonify({'has_notifications': task_check_notifications_member_V1})
          
     return jsonify({'has_notifications': False})
+
+
+
+# ****************************************************************************************************************
+# ****************************************************************************************************************
+# ****************************     Advance Filter task     ***************************************************************
+# ****************************************************************************************************************
+
+
+@app.route('/Filter_Advance', methods = ['POST'])
+
+@login_required
+@leader_required
+
+def Filter_Advance():
+ 
+  Filter_projectName = request.form.get('Project_V')
+  Filter_member_name = request.form.get('assigned_to')
+
+  Filter_from_end_date = request.form.get('from_end_date')
+  if Filter_from_end_date != '' :
+    from_end_date_str = datetime.strptime(Filter_from_end_date, '%Y-%m-%dT%H:%M').replace(microsecond=0) 
+  else :
+    from_end_date_str = ''
+
+  Filter_to_end_date = request.form.get('to_end_date')
+  if Filter_to_end_date  !=  '' :
+     to_end_date_str = datetime.strptime(Filter_to_end_date, '%Y-%m-%dT%H:%M').replace(microsecond=0) 
+  else :
+    to_end_date_str = ''
+ 
+  now = datetime.now().replace(microsecond=0)
+
+  from DataBase import Task_assigned_by_AdvanceFilter
+  Task_data = Task_assigned_by_AdvanceFilter (Filter_projectName, Filter_member_name, from_end_date_str, to_end_date_str)
+
+  from DataBase import user_member
+  members = user_member()
+
+  from DataBase import project_table
+  projects = project_table()
+
+  from DataBase import Overdue_Tasks
+  Overdue_Tasks_V = Overdue_Tasks(current_user.id,now)
+ 
+
+  return render_template('leader_dashboard.html', tasks=Task_data, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V, projects = projects)
 
 
 # ****************************************************************************************************************
