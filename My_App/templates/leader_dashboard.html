@@ -57,7 +57,7 @@ endblock %}
 
 <!-- Team Overview Cards -->
 <div class="row mb-4">
-  <div class="col-md-3">
+  <div class="col-md-4">
     <div class="card text-white bg-primary">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center">
@@ -70,7 +70,8 @@ endblock %}
       </div>
     </div>
   </div>
-  <div class="col-md-3">
+
+  <div class="col-md-2">
     <div class="card text-white bg-success">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center">
@@ -86,14 +87,24 @@ endblock %}
       </div>
     </div>
   </div>
-  <div class="col-md-3">
+
+  <div class="col-md-2">
     <div class="card text-white bg-warning">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center">
           <div>
             <h6 class="card-subtitle mb-2 opacity-75">Pending</h6>
             <h2 class="card-title mb-0">
-              {{ tasks|selectattr('status', 'equalto', 'pending')|list|length }}
+
+              {% set filtered_tasks_01 = [] %}
+              {% for task in tasks %}
+              {% if task.status == 'pending' and task.current_deadline > now and task.status !='completed' %}
+              {% set filtered_tasks_01=filtered_tasks_01.append(task) %} {% endif %} {% endfor %} {{
+              filtered_tasks_01|length }}
+            </h2>
+
+
+
             </h2>
           </div>
           <i class="bi bi-hourglass-split fs-1 opacity-25"></i>
@@ -101,14 +112,17 @@ endblock %}
       </div>
     </div>
   </div>
-  <div class="col-md-3">
-    <div class="card text-white bg-danger">
+
+
+  <div class="col-md-2">
+    <div class="card text-white bg-info">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center">
           <div>
-            <h6 class="card-subtitle mb-2 opacity-75">Overdue</h6>
+            <h6 class="card-subtitle mb-2 opacity-75">Delayed</h6>
             <h2 class="card-title mb-0">
-              {{ Overdue_Tasks_V|length }}
+              {{ tasks|selectattr('status', 'equalto', 'delayed')|list|length
+              }}
             </h2>
           </div>
           <i class="bi bi-clock-history fs-1 opacity-25"></i>
@@ -116,20 +130,40 @@ endblock %}
       </div>
     </div>
   </div>
+
+  <div class="col-md-2">
+    <div class="card text-white bg-danger">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="card-subtitle mb-2 opacity-75">Overdue</h6>
+            <h2 class="card-title mb-0">
+              {% set filtered_tasks = [] %}
+              {% for task in tasks %}
+              {% if task.Dec == 0 and
+              (task.current_deadline < now or task.requires_leader_attention==1) and task.status !='completed' %} {% set
+                filtered_tasks=filtered_tasks.append(task) %} {% endif %} {% endfor %} {{ filtered_tasks|length }} </h2>
+          </div>
+          <i class="bi bi-x-circle fs-1 opacity-25"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 
 <!-- ********************************************************************************************************** -->
-<!-- Tasks Table -->
+<!-- Tasks Table Filters-->
 <!-- ********************************************************************************************************** -->
 
 <div class="card">
 
   <div class="card-header d-flex justify-content-between align-items-center" style="border-bottom: solid #3B4953 5px;">
-    <span>Team Tasks</span>
+
 
     <form class="d-flex" role="search">
-      <select id="formGroupExampleInput" class="me-2 form-select memberClass text-center">
+      <select id="formGroupExampleInput" class="me-2 form-select memberClass text-center Filter_Member_Form">
 
         <option value="">Filter by team member</option>
         {% for member in members %}
@@ -138,8 +172,8 @@ endblock %}
 
       </select>
 
-      <button class="btn btn-sm btn-outline-secondary Filter_But" data-bs-toggle="tooltip" data-bs-placement="top"
-        data-bs-title="Filter By Team Member Name" onclick="Filter_Memeber_Fun()" type="button">
+      <button class="btn btn-sm btn-outline-secondary Filter_But Filter_Member_Form" data-bs-toggle="tooltip"
+        data-bs-placement="top" data-bs-title="Filter By Team Member Name" onclick="Filter_Memeber_Fun()" type="button">
         <i id="Filter_Member_Icon" class="bi bi-funnel"></i>
       </button>
     </form>
@@ -164,20 +198,24 @@ endblock %}
       <button class="btn btn-sm btn-outline-primary active" data-filter="all" onclick="window.location.href='/'">
         All
       </button>
-      <button class="btn btn-sm btn-outline-primary" data-filter="pending">
+      <button class="btn btn-sm btn-outline-warning" data-filter="Pending">
         Pending
       </button>
-      <button class="btn btn-sm btn-outline-warning" data-filter="delayed">
+      <button class="btn btn-sm btn-outline-info" data-filter="Delayed">
         Delayed
       </button>
-      <button class="btn btn-sm btn-outline-success" data-filter="completed">
+      <button class="btn btn-sm btn-outline-danger" data-filter="Overdue">
+        Overdue
+      </button>
+      <button class="btn btn-sm btn-outline-success" data-filter="Completed">
         Completed
       </button>
-      <button class="btn btn-sm btn-outline-danger" data-filter="OK" onclick="window.location.href='/Filter_Ok_Task'">
+      <button class="btn btn-sm btn-outline-dark" data-filter="OK" onclick="window.location.href='/Filter_Ok_Task'">
         OK.
       </button>
 
     </div>
+
   </div>
 
   <!-- ********************************************  table - card  view  ********************************* -->
@@ -222,7 +260,8 @@ endblock %}
             <td class="text-center">{{ task.project_name }}</td>
             <td class="text-center">{{ task.assigned_to_fullname }}</td>
             <td class="text-center" dir="ltr">{{ task.start_date.strftime('%d %b, %Y') }}</td>
-            <td class="text-center">
+
+            <td class="text-center"> <!-- ****** deadline date ******** -->
               <span
                 class="deadline-text {% if task.current_deadline < now and task.status != 'completed' %}deadline-overdue{% endif %}"
                 dir="ltr">
@@ -235,38 +274,40 @@ endblock %}
               </div>
               {% endif %}
             </td>
-            <td class="text-center">
-              {% if task.status == 'completed' %}
-              <span class="status-badge status-completed">
-                <i class="bi bi-check-lg me-1"></i> Completed
+
+            <td class="text-center"> <!-- ****** status ******** -->
+              {% if
+              task.status == 'completed' %}
+              <span class="status-badge status-completed" data-status_01="Completed">
+                <i class="bi bi-check-lg me-1 status-badge-icon"></i> Completed
               </span>
 
               {% elif
               task.status == 'delayed' and task.current_deadline < now %} <span
-                class="status-badge status-overdue-delayed mb-2">
+                class="status-badge status-overdue-delayed mb-2" data-status_01="Overdue">
                 <i class="bi bi-clock me-1 status-badge-icon "></i> Delayed</span>
                 <hr>
                 <span class="status-badge status-overdue-delayed">
                   <i class="bi bi-exclamation-lg me-1 status-badge-icon"></i> Overdue </span>
                 {% elif
-                task.current_deadline < now %} <span class="status-badge status-overdue">
-                  <i class="bi bi-exclamation-lg me-1 status-badge-icon"></i> Overdue
-                  </span>
-                  {% elif task.status == 'delayed' %}
-                  <span class="status-badge status-delayed">
+                task.current_deadline < now %} <span class="status-badge status-overdue" data-status_01="Overdue">
+                  <i class="bi bi-exclamation-lg me-1 status-badge-icon"></i> Overdue </span>
+                  {% elif
+                  task.status == 'delayed' %}
+                  <span class="status-badge status-delayed" data-status_01="Delayed">
                     <i class="bi bi-clock me-1 status-badge-icon"></i> Delayed
                   </span>
                   </span>
 
                   {% else %}
-                  <span class="status-badge status-pending">
+                  <span class="status-badge status-pending " data-status_01="Pending">
                     <i class="bi bi-hourglass me-1 status-badge-icon"></i> Pending
                   </span>
 
                   {% endif %}
             </td>
 
-            <td class="text-center">
+            <td class="text-center"> <!-- ******  Resolve  **** -->
 
               <div class="action-buttons">
                 {% if task.status != 'completed' and task.current_deadline < now %} <button
@@ -278,7 +319,7 @@ endblock %}
               </div>
             </td>
 
-            <td class="text-center">
+            <td class="text-center"> <!-- ******  action  **** -->
 
               <div class="action-buttons">
                 <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
@@ -307,7 +348,7 @@ endblock %}
             </td>
 
 
-            <td class="text-center">
+            <td class="text-center"> <!-- ******  ok  **** -->
 
               <button id="Dec_But" class="btn btn-sm btn-outline-danger  Dec_View_But" type="button"
                 data-bs-placement="top" data-bs-title="Task Dec" data-class-value="{{  task.task_id }}"
@@ -338,25 +379,27 @@ endblock %}
             <div class="d-flex center justify-content-between align-items-center mb-3">
               <div>
                 {% if task.status == 'completed' %}
-                <span class="status-badge status-completed">
+                <span class="status-badge status-completed" data-status_01="Completed">
                   <i class="bi bi-check-lg me-1"></i> Completed
                 </span>
 
                 {% elif task.status == 'delayed' and task.current_deadline < now %} <span
-                  class="status-badge status-overdue-delayed">
+                  class="status-badge status-overdue-delayed" data-status_01="Overdue">
                   <i class="bi bi-clock me-1"></i> Delayed
-                  <i class="bi bi-exclamation-lg me-1"></i> Overdue {% elif
-                  task.current_deadline < now %} <span class="status-badge status-overdue">
+                  <span class="me-2"></span>
+                  <i class="bi bi-exclamation-lg me-1"></i> Overdue
+                  {% elif
+                  task.current_deadline < now %} <span class="status-badge status-overdue" data-status_01="Overdue">
                     <i class="bi bi-exclamation-lg me-1"></i> Overdue
                     </span>
                     {% elif task.status == 'delayed' %}
-                    <span class="status-badge status-delayed">
+                    <span class="status-badge status-delayed" data-status_01="Delayed">
                       <i class="bi bi-clock me-1"></i> Delayed
                     </span>
                     </span>
 
                     {% else %}
-                    <span class="status-badge status-pending">
+                    <span class="status-badge status-pending" data-status_01="Pending">
                       <i class="bi bi-hourglass me-1"></i> Pending
                     </span>
 
@@ -692,7 +735,7 @@ endblock %}
 
           <hr>
 
-          <label for="end_date" class="form-label fw-bold">End Date (Deadline) Between</label>
+          <label for="from_end_date" class="form-label fw-bold">End Date (Deadline) Between</label>
           <input type="datetime-local" class="form-control mb-3" id="from_end_date" name="from_end_date">
           <input type="datetime-local" class="form-control" id="to_end_date" name="to_end_date">
           <hr>

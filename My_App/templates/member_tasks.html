@@ -88,118 +88,153 @@
   </div>
 </div>
 
+
+<!-- Tasks Filter -->
+
+
+<div class="card-header d-flex justify-content-between align-items-center mb-3"
+  style="border-bottom: solid #3B4953 5px;">
+
+  <form class="d-flex" role="search">
+    <input class="form-control me-2 Search_But" type="search" placeholder="Search" aria-label="Search">
+    <button class="btn btn-sm btn-outline-secondary Search_But" data-bs-toggle="tooltip" data-bs-placement="top"
+      data-bs-title="Search Tasks" id="SearchBut" type="button" onclick="Search_Fun()"><i class="bi bi-search"></i>
+    </button>
+  </form>
+
+  <div>
+    <button class="btn btn-sm btn-outline-primary active me-3" data-filter="all" onclick="window.location.href='/'">
+      All
+    </button>
+
+    <button id="Filter_But" class="btn btn-sm btn-outline-danger  Filter_But" type="button" data-bs-placement="top"
+      data-bs-title="Filter Task" data-bs-toggle="modal" data-bs-target="#FilterModal">
+      <i class="bi bi-funnel"></i> Filter
+    </button>
+  </div>
+
+</div>
+
+
+
+<!-- ***************************** -->
+
+
+
+
+
 <!-- Tasks List -->
-<div class="row mb-3 " style="overflow-y: auto; overflow-x: hidden; max-height: 70vh;">
+<div class="row mb-3 " style="overflow-y: auto; overflow-x: hidden; max-height: 62vh; background-color:#EBF4DD"">
   {% for task in tasks %}
-  <div class="col-md-12 mb-1 mt-1">
-    <div
-      class="card task-card {% if task.status == 'completed' %}completed{% elif  task.current_deadline < now %}overdue{% elif task.status == 'delayed' %}delayed{% else %}pending{% endif %}">
-      <div class="card-body">
+  <div class=" col-md-12 mb-1 mt-1">
+  <div
+    class="card task-card {% if task.status == 'completed' %}completed{% elif  task.current_deadline < now %}overdue{% elif task.status == 'delayed' %}delayed{% else %}pending{% endif %}">
+    <div class="card-body">
 
 
-        <div class="d-flex justify-content-between align-items-start mb-3">
-          <span class="status-badge {% if task.status == 'completed' %}status-completed
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <span class="status-badge {% if task.status == 'completed' %}status-completed
                                     {% elif task.requires_leader_attention and task.current_deadline < now %}status-overdue
                                     {% elif task.status == 'delayed' %}status-delayed
                                     {% else %}status-pending{% endif %}">
-            {% if task.status == 'completed' %}
-            <i class="bi bi-check-lg me-1"></i> Completed
-            {% elif task.requires_leader_attention and task.current_deadline < now %} <i
-              class="bi bi-exclamation-lg me-1"></i>
-              Overdue
-              {% elif task.status == 'delayed' %}
-              <i class="bi bi-clock me-1"></i> Delayed
-              {% else %}
-              <i class="bi bi-hourglass me-1"></i> Pending
-              {% endif %}
+          {% if task.status == 'completed' %}
+          <i class="bi bi-check-lg me-1"></i> Completed
+          {% elif task.requires_leader_attention and task.current_deadline < now %} <i
+            class="bi bi-exclamation-lg me-1"></i>
+            Overdue
+            {% elif task.status == 'delayed' %}
+            <i class="bi bi-clock me-1"></i> Delayed
+            {% else %}
+            <i class="bi bi-hourglass me-1"></i> Pending
+            {% endif %}
+        </span>
+
+        <div
+          style="border: solid; border-radius: 50%; width: 32px; height: 32px; text-align: center; align-items:center">
+          {{ loop.index }}
+        </div>
+
+      </div>
+
+      <div class="d-flex justify-content-end align-items-start mb-3">
+        <div dir="rtl">
+          <h5 class="card-title fw-bold mb-3">{{ task.title }}</h5>
+          <h5 class="card-title fw-bold mb-3">{{ task.project_name }}</h5>
+          <p class="text-muted mb-3">{{ task.description }}</p>
+        </div>
+
+      </div>
+
+      <div class="mb-3">
+
+        <div class="d-flex justify-content-end align-items-center mb-2">
+
+          <span><strong>{{ task.start_date.strftime('%d %b, %Y') }}</strong> : تاريخ البداية النشاط &nbsp;&nbsp;
           </span>
-
-          <div
-            style="border: solid; border-radius: 50%; width: 32px; height: 32px; text-align: center; align-items:center">
-            {{ loop.index }}
-          </div>
+          <i class="bi bi-calendar-event text-primary me-2"></i>
 
         </div>
 
-        <div class="d-flex justify-content-end align-items-start mb-3">
-          <div dir="rtl">
-            <h5 class="card-title fw-bold mb-3">{{ task.title }}</h5>
-            <h5 class="card-title fw-bold mb-3">{{ task.project_name }}</h5>
-            <p class="text-muted mb-3">{{ task.description }}</p>
-          </div>
+        <div class="d-flex justify-content-end align-items-center mb-2">
 
+          <span><strong
+              class="{% if task.current_deadline < now and task.status != 'completed' %}text-danger{% endif %}">
+              {{ task.current_deadline.strftime('%d %b, %Y at %I:%M %p') }}
+            </strong>
+            : &nbsp;تاريخ نهاية النشاط &nbsp;&nbsp; </span>
+          <i class="bi bi-alarm text-danger me-2"></i>
         </div>
-
-        <div class="mb-3">
-
-          <div class="d-flex justify-content-end align-items-center mb-2">
-
-            <span><strong>{{ task.start_date.strftime('%d %b, %Y') }}</strong> : تاريخ البداية النشاط &nbsp;&nbsp;
-            </span>
-            <i class="bi bi-calendar-event text-primary me-2"></i>
-
-          </div>
-
-          <div class="d-flex justify-content-end align-items-center mb-2">
-
-            <span><strong
-                class="{% if task.current_deadline < now and task.status != 'completed' %}text-danger{% endif %}">
-                {{ task.current_deadline.strftime('%d %b, %Y at %I:%M %p') }}
-              </strong>
-              : &nbsp;تاريخ نهاية النشاط &nbsp;&nbsp; </span>
-            <i class="bi bi-alarm text-danger me-2"></i>
-          </div>
-
-
-        </div>
-
-        {% if task.status == 'delayed' and task.reason_for_delay %}
-        <div class="alert alert-warning p-2 mb-3" dir="rtl">
-          <i class="bi bi-info-circle me-1"></i> <strong>&nbsp; اسباب التأجيل : &nbsp; </strong> {{
-          task.reason_for_delay|truncate(250)
-          }}
-        </div>
-        {% endif %}
-
-
-        {% if task.status != 'completed' %}
-        <div class="action-buttons">
-          <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#completeTaskModal"
-            data-task-id="{{ task.task_id }}" data-task-title="{{ task.title }}">
-            <i class="bi bi-check-circle me-1"></i> Mark Complete
-          </button>
-          <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#delayTaskModal"
-            data-task-id="{{ task.task_id }}" data-task-title="{{ task.title }}">
-            <i class="bi bi-clock-history me-1"></i> Request Extension
-          </button>
-        </div>
-        {% else %}
-        <div class="alert alert-success mb-0">
-          <i class="bi bi-check-circle me-1"></i> Completed on {{ task.completed_at.strftime('%b %d, %Y at %I:%M %p')
-          }}
-        </div>
-        {% endif %}
 
 
       </div>
 
-
-
-    </div>
-  </div>
-  {% endfor %}
-
-  {% if tasks|length == 0 %}
-  <div class="col-12">
-    <div class="card">
-      <div class="card-body text-center py-5">
-        <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
-        <h4 class="text-muted">No tasks assigned yet</h4>
-        <p class="text-muted">Check back later or contact your team leader for new assignments</p>
+      {% if task.status == 'delayed' and task.reason_for_delay %}
+      <div class="alert alert-warning p-2 mb-3" dir="rtl">
+        <i class="bi bi-info-circle me-1"></i> <strong>&nbsp; اسباب التأجيل : &nbsp; </strong> {{
+        task.reason_for_delay|truncate(250)
+        }}
       </div>
+      {% endif %}
+
+
+      {% if task.status != 'completed' %}
+      <div class="action-buttons">
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#completeTaskModal"
+          data-task-id="{{ task.task_id }}" data-task-title="{{ task.title }}">
+          <i class="bi bi-check-circle me-1"></i> Mark Complete
+        </button>
+        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#delayTaskModal"
+          data-task-id="{{ task.task_id }}" data-task-title="{{ task.title }}">
+          <i class="bi bi-clock-history me-1"></i> Request Extension
+        </button>
+      </div>
+      {% else %}
+      <div class="alert alert-success mb-0">
+        <i class="bi bi-check-circle me-1"></i> Completed on {{ task.completed_at.strftime('%b %d, %Y at %I:%M %p')
+        }}
+      </div>
+      {% endif %}
+
+
+    </div>
+
+
+
+  </div>
+</div>
+{% endfor %}
+
+{% if tasks|length == 0 %}
+<div class="col-12">
+  <div class="card">
+    <div class="card-body text-center py-5">
+      <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+      <h4 class="text-muted">No tasks assigned yet</h4>
+      <p class="text-muted">Check back later or contact your team leader for new assignments</p>
     </div>
   </div>
-  {% endif %}
+</div>
+{% endif %}
 </div>
 
 <!-- Complete Task Modal -->
@@ -265,6 +300,70 @@
   </div>
 </div>
 
+
+<!-- **********************************************  Filter Modal **********************************************-->
+
+<div class="modal fade" id="FilterModal" tabindex="-1" aria-labelledby="FilterModal" aria-hidden="true">
+  <div class="modal-dialog">
+
+    <div class="modal-content">
+
+      <form method="POST" action="{{ url_for('Filter_Advance') }}" style="display:inline;">
+
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Filter Task</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+
+        <div class="modal-body">
+          Choose Filter Prameter
+
+          <hr>
+
+          <label for="Project_V" class="form-label fw-bold">Project</label>
+          <select class="form-select" id="Project_V" name="Project_V" dir="rtl">
+            <option value="">اختار اسم المشروع .....</option>
+            {% for project in projects %}
+            <option value="{{ project.project_id }}"> {{ project.project_name }}</option>
+            {% endfor %}
+          </select>
+          <div id="modalbody" dir="rtl"></div>
+          <hr>
+
+          <div style="display: none;">
+            <label for="assigned_to" class="form-label fw-bold">Assign To</label>
+            <select class="form-select" id="assigned_to" name="assigned_to" dir="rtl">
+              <option value="">اختار المسؤول عن النشاط .....</option>
+              {% for member in members %}
+              <option value="{{ member.user_id }}"> {{ member.full_name }} ({{ member.username }})</option>
+              {% endfor %}
+            </select>
+          </div>
+
+
+          <hr>
+
+          <label for="end_date" class="form-label fw-bold">End Date (Deadline) Between</label>
+          <input type="datetime-local" class="form-control mb-3" id="from_end_date" name="from_end_date">
+          <input type="datetime-local" class="form-control" id="to_end_date" name="to_end_date">
+          <hr>
+
+
+        </div>
+
+        <div class="modal-footer">
+
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary"> <i class="fas fa-trash"></i> Apply Filter
+          </button>
+          <hr>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -299,4 +398,67 @@
 
 
 </script>
+
+
+
+<script>
+
+
+  // Get the modal element (adjust the selector if needed)
+  let filterModal = document.getElementById('FilterModal');
+  let modalbody_v = document.getElementById('modalbody')
+  // When the modal is fully shown, initialize TomSelect
+  filterModal.addEventListener('shown.bs.modal', function () {
+    // Get the select element
+    let projectSelect = document.getElementById('Project_V');
+
+    // Check if TomSelect is already initialized on this element
+    if (projectSelect.tomselect) {
+      projectSelect.tomselect.destroy(); // destroy existing instance
+    }
+
+    // Initialize TomSelect
+    new TomSelect(projectSelect, {
+      placeholder: 'اختار اسم المشروع .....',
+      searchField: ['text'],
+      create: false,
+      dropdownParent: modalbody_v,
+      maxOptions: 1000
+    });
+  });
+
+
+</script>
+
+<script>
+
+  //******************************** Add event listener to the entire document  **********************
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Enter') {
+      event.preventDefault(); // Prevent default behavior
+      document.getElementById('SearchBut').click(); // Trigger the button click
+    }
+  });
+
+  //******************************** Search  document  **********************
+  function Search_Fun() {
+
+    let Search_V = document.querySelector(".Search_But").value.trim()
+    if (Search_V == "") {
+      window.location.href = "/"
+    } else {
+      window.location.href = "/Search_Data?search_v=" + Search_V
+    }
+  }
+
+
+
+
+
+
+
+</script>
+
+
 {% endblock %}

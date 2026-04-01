@@ -174,21 +174,18 @@ def dashboard():
 
           from DataBase import Overdue_Tasks
           Overdue_Tasks_V = Overdue_Tasks(current_user.id,now)
+        
           
-        #   for task in Task_data:
-        #      if task['current_deadline']:
-        #       print(task['current_deadline'])
-        #       Task_data['formatted_current_deadline'] = task['current_deadline'].strftime('%d %b, %Y at %I:%M %p')
-        #      else:
-        #       Task_data['formatted_current_deadline'] = 'No deadline'
-
-          
-          return render_template('leader_dashboard.html', tasks=Task_data, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V, projects = projects)
+          return render_template('leader_dashboard.html', tasks=Task_data, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V, projects = projects )
+      
       else:
           from DataBase import Task_assigned_to_CurrentUser
           Task_data = Task_assigned_to_CurrentUser(current_user.id)
+         
+          from DataBase import project_table
+          projects = project_table()
 
-          return render_template('member_tasks.html', tasks=Task_data, now=now )
+          return render_template('member_tasks.html', tasks=Task_data, now=now, projects=projects )
 
 #**************************************************************************************************************
 #*******************************      assign-task        ******************************************************
@@ -526,13 +523,14 @@ def Filter_Data_ByMember():
 
 @app.route('/Search_Data', methods=['GET', 'POST'])
 @login_required
-@leader_required
+
 def Search_Fun():
 
    search_v = request.args.get('search_v')
 
 #    now = datetime.utcnow()
    now = datetime.now().replace(microsecond=0)   
+   
    if current_user.role == 'leader':
         
           from DataBase import Filter_task_assigned_by_id
@@ -548,12 +546,15 @@ def Search_Fun():
           Overdue_Tasks_V = Overdue_Tasks(current_user.id,now)
           print(now)
           
-          return render_template('leader_dashboard.html', tasks=Filter_tasks_V, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V,projects = projects)
+          return render_template('leader_dashboard.html', tasks=Filter_tasks_V, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V,projects = projects )
    else:
-          from DataBase import Task_assigned_to_CurrentUser
-          Task_data = Task_assigned_to_CurrentUser(current_user.id)
+          from DataBase import Filter_Task_assigned_to_CurrentUser
+          Task_data = Filter_Task_assigned_to_CurrentUser(search_v,current_user.id)
+          
+          from DataBase import project_table
+          projects = project_table()
 
-          return render_template('member_tasks.html', tasks=Task_data, now=now )
+          return render_template('member_tasks.html', tasks=Task_data, now=now, projects=projects )
    
    
 # ****************************************************************************************************************
@@ -604,7 +605,7 @@ def Filter_Ok_Task():
           Overdue_Tasks_V = Overdue_Tasks_Filter_Ok(current_user.id)
 
 
-          return render_template('leader_dashboard.html', tasks=Task_data, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V, projects = projects)
+          return render_template('leader_dashboard.html', tasks=Task_data, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V, projects = projects )
          
    return redirect(url_for('dashboard'))
 
@@ -1123,7 +1124,7 @@ def check_notifications():
 @app.route('/Filter_Advance', methods = ['POST'])
 
 @login_required
-@leader_required
+
 
 def Filter_Advance():
  
@@ -1144,21 +1145,34 @@ def Filter_Advance():
  
   now = datetime.now().replace(microsecond=0)
 
-  from DataBase import Task_assigned_by_AdvanceFilter
-  Task_data = Task_assigned_by_AdvanceFilter (Filter_projectName, Filter_member_name, from_end_date_str, to_end_date_str)
 
-  from DataBase import user_member
-  members = user_member()
 
-  from DataBase import project_table
-  projects = project_table()
+  if current_user.role == 'leader':
+    from DataBase import Task_assigned_by_AdvanceFilter
+    Task_data = Task_assigned_by_AdvanceFilter (Filter_projectName, Filter_member_name, from_end_date_str, to_end_date_str)
 
-  from DataBase import Overdue_Tasks
-  Overdue_Tasks_V = Overdue_Tasks(current_user.id,now)
+    from DataBase import user_member
+    members = user_member()
+
+    from DataBase import project_table
+    projects = project_table()
+
+    from DataBase import Overdue_Tasks
+    Overdue_Tasks_V = Overdue_Tasks(current_user.id,now)
  
 
-  return render_template('leader_dashboard.html', tasks=Task_data, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V, projects = projects)
+    return render_template('leader_dashboard.html', tasks=Task_data, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V, projects = projects )
+ 
+ 
+  else:
+          from DataBase import Task_assigned_to_AdvanceFilter
+          Task_data = Task_assigned_to_AdvanceFilter(Filter_projectName, Filter_member_name, from_end_date_str, to_end_date_str,current_user.id)
+          
+          from DataBase import project_table
+          projects = project_table()
 
+          return render_template('member_tasks.html', tasks=Task_data, now=now, projects=projects )
+   
 
 # ****************************************************************************************************************
 # ****************************   telegram massege    ***********************************************************

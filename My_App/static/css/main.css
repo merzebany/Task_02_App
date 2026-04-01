@@ -326,6 +326,10 @@
       display: none;
     }
 
+.Filter_Member_Form {
+     display: none;
+}
+
 
 #pationation_area_v{
     display: none;

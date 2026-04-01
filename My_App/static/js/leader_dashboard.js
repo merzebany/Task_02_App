@@ -9,16 +9,31 @@
 
       const filter = this.getAttribute("data-filter");
       document.querySelectorAll(".task-row").forEach((row) => {
-        if (filter === "all" || row.getAttribute("data-status") === filter) {
+
+        const statusSpan = row.querySelector('[data-status_01]')
+        // console.log(statusSpan.getAttribute("data-status_01"))
+
+
+        // if (statusSpan) {
+        // console.log(statusSpan.getAttribute('data-status_01'));
+        // } else {
+        // console.log('No data-status_01 found in this row');
+        // }
+        
+
+        if (filter === "all" || statusSpan.getAttribute("data-status_01") === filter) {
           row.style.display = "";
-          
+          // console.log("Showing row with status:", statusSpan.getAttribute("data-status_01"));
+          // console.log("Filter applied:", filter);
         } else {
           row.style.display = "none";
-          
+          // console.log("Hiding row with status:", statusSpan.getAttribute("data-status_01"));
+          // console.log("Filter applied:", filter);
         }
           
       });
     });
+    
 
   });
 

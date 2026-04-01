@@ -197,6 +197,16 @@ try:
       cr = db.cursor(as_dict=True)
       cr.execute(f"select * from Task_View where assigned_by_id = %s and Dec = 0 and ( title LIKE  '%' + %s + '%' or description LIKE  '%' + %s + '%' or project_name LIKE  '%' + %s + '%')  ORDER BY current_deadline ", (current_user_id, Search_V_01, Search_V_01, Search_V_01))
       return  cr.fetchall()
+   
+# **********************************************************************************************************
+# ********************************  Search in Data Task in assigned_to_id **********************************
+# **********************************************************************************************************
+
+
+   def Filter_Task_assigned_to_CurrentUser(Search_V_01,current_user_id):
+      cr = db.cursor(as_dict=True)
+      cr.execute(f"select * from Task_View where assigned_to_id = %s and Dec = 0 and ( title LIKE  '%' + %s + '%' or description LIKE  '%' + %s + '%' or project_name LIKE  '%' + %s + '%')  ORDER BY current_deadline ", (current_user_id, Search_V_01, Search_V_01, Search_V_01))
+      return  cr.fetchall()
     
 # **********************************************************************************************************
 
@@ -247,23 +257,32 @@ try:
 
 # # **********************************************************************************************************
 
-# # **********************************************************************************************************
-# # ********************************  Task filter by task_Id  ********************************************
-# # **********************************************************************************************************
+# # # **********************************************************************************************************
+# # # ********************************  Task filter by task_Id  ********************************************
+# # # **********************************************************************************************************
 
-   def Task_assigned_by_AdvanceFilter (FilterText):   
+#    def Task_assigned_by_AdvanceFilter (FilterText):   
      
-      cr = db.cursor(as_dict=True)
-      cr.execute(f"select * from [Task_View] {FilterText}")  
+#       cr = db.cursor(as_dict=True)
+#       cr.execute(f"select * from [Task_View] {FilterText}")  
      
+#       return  cr.fetchall()
+
+
+# **********************************************************************************************************
+# ********************************  Search in Data Task filter by memeber **********************************
+# **********************************************************************************************************
+
+
+   def Task__assigned_by_member(Filter_by_member_v ):
+      cr = db.cursor(as_dict=True) 
+      cr.execute(f"select * from Task_View where assigned_to_id = %s and Dec = 0  ORDER BY current_deadline ", (Filter_by_member_v))
       return  cr.fetchall()
-
-
 
 # # **********************************************************************************************************
 
 # **********************************************************************************************************
-# ********************************  Search in Data Task filter by memeber *********************************************************
+# ********************************  Search in Data Task filter by memeber **********************************
 # **********************************************************************************************************
 
 
@@ -302,7 +321,48 @@ try:
 
       return  cr.fetchall()
      
-  
+
+
+# **********************************************************************************************************
+# ********************************  Search in Data Task filter by memeber **********************************
+# **********************************************************************************************************
+
+
+   def Task_assigned_to_AdvanceFilter (Filter_projectName, Filter_member_name, from_end_date_str, to_end_date_str, current_user):
+
+      cr = db.cursor(as_dict=True) 
+
+
+      if Filter_projectName != '' and  Filter_member_name == '' and from_end_date_str == '' and to_end_date_str == '' :
+       
+        cr.execute(f"select * from Task_View where assigned_to_id = %s and project_id = %s ORDER BY current_deadline ", (current_user,Filter_projectName,))
+       
+      elif Filter_projectName == '' and Filter_member_name != '' and from_end_date_str == '' and to_end_date_str == '' :
+
+        cr.execute(f"select * from Task_View where assigned_to_user_id = %s ORDER BY current_deadline ", (Filter_member_name,))
+
+      elif Filter_projectName == '' and Filter_member_name == '' and from_end_date_str != '' and to_end_date_str != '' :
+
+        cr.execute(f"select * from Task_View where assigned_to_id = %s and current_deadline between  %s and %s ORDER BY current_deadline", (current_user, from_end_date_str, to_end_date_str))
+
+      elif Filter_projectName != '' and Filter_member_name != '' and from_end_date_str == '' and to_end_date_str == '' :
+       
+         cr.execute(f"select * from Task_View where project_id = %s and assigned_to_user_id = %s ORDER BY current_deadline", (Filter_projectName, Filter_member_name))
+      
+      elif Filter_projectName != '' and Filter_member_name == '' and from_end_date_str != '' and to_end_date_str != '' :
+     
+         cr.execute(f"select * from Task_View where assigned_to_id = %s and project_id = %s and current_deadline between  %s and %s ORDER BY current_deadline ", (current_user, Filter_projectName, from_end_date_str, to_end_date_str))
+
+      elif Filter_projectName == '' and Filter_member_name != '' and from_end_date_str != '' and to_end_date_str != '' :
+           
+           cr.execute(f"select * from Task_View where assigned_to_user_id = %s and current_deadline between  %s and %s ORDER BY current_deadline ", (Filter_member_name, from_end_date_str, to_end_date_str))
+
+      elif Filter_projectName != '' and Filter_member_name != '' and from_end_date_str != '' and to_end_date_str != '' :
+           
+           cr.execute(f"select * from Task_View where project_id = %s and assigned_to_user_id = %s and current_deadline between  %s and %s ORDER BY current_deadline ", (Filter_projectName, Filter_member_name, from_end_date_str, to_end_date_str))
+
+      return  cr.fetchall()
+   
 # # **********************************************************************************************************
 # # ********************************  user filter by member   *****************************************************
 # # **********************************************************************************************************
