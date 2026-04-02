@@ -65,7 +65,7 @@ endblock %}
             <h6 class="card-subtitle mb-2 opacity-75">Total Tasks</h6>
             <h2 class="card-title mb-0">{{ tasks|length }}</h2>
           </div>
-          <i class="bi bi-tasks fs-1 opacity-25"></i>
+          <i class="bi bi-tasks fs-1 opacity-25 "></i>
         </div>
       </div>
     </div>
@@ -82,7 +82,7 @@ endblock %}
               }}
             </h2>
           </div>
-          <i class="bi bi-check-circle fs-1 opacity-25"></i>
+          <i class="bi bi-check-circle fs-1 opacity-25 status-badge-icon"></i>
         </div>
       </div>
     </div>
@@ -107,7 +107,7 @@ endblock %}
 
             </h2>
           </div>
-          <i class="bi bi-hourglass-split fs-1 opacity-25"></i>
+          <i class="bi bi-hourglass-split fs-1 opacity-25 status-badge-icon"></i>
         </div>
       </div>
     </div>
@@ -125,7 +125,7 @@ endblock %}
               }}
             </h2>
           </div>
-          <i class="bi bi-clock-history fs-1 opacity-25"></i>
+          <i class="bi bi-clock-history fs-1 opacity-25 status-badge-icon"></i>
         </div>
       </div>
     </div>
@@ -144,7 +144,7 @@ endblock %}
               (task.current_deadline < now or task.requires_leader_attention==1) and task.status !='completed' %} {% set
                 filtered_tasks=filtered_tasks.append(task) %} {% endif %} {% endfor %} {{ filtered_tasks|length }} </h2>
           </div>
-          <i class="bi bi-x-circle fs-1 opacity-25"></i>
+          <i class="bi bi-x-circle fs-1 opacity-25 status-badge-icon"></i>
         </div>
       </div>
     </div>
@@ -194,25 +194,75 @@ endblock %}
     </div>
 
 
-    <div class="btn-group">
-      <button class="btn btn-sm btn-outline-primary active" data-filter="all" onclick="window.location.href='/'">
-        All
-      </button>
-      <button class="btn btn-sm btn-outline-warning" data-filter="Pending">
-        Pending
-      </button>
-      <button class="btn btn-sm btn-outline-info" data-filter="Delayed">
-        Delayed
-      </button>
-      <button class="btn btn-sm btn-outline-danger" data-filter="Overdue">
-        Overdue
-      </button>
-      <button class="btn btn-sm btn-outline-success" data-filter="Completed">
-        Completed
-      </button>
-      <button class="btn btn-sm btn-outline-dark" data-filter="OK" onclick="window.location.href='/Filter_Ok_Task'">
-        OK.
-      </button>
+    <div class="btn-group"> <!-- status filter-->
+
+      <div class="btn-group" id="Status_btns">
+        <button class="btn btn-sm btn-outline-primary active" data-filter="all" onclick="window.location.href='/'">
+          All
+        </button>
+        <button class="btn btn-sm btn-outline-warning" data-filter="Pending">
+          Pending
+        </button>
+        <button class="btn btn-sm btn-outline-info" data-filter="Delayed">
+          Delayed
+        </button>
+        <button class="btn btn-sm btn-outline-danger" data-filter="Overdue">
+          Overdue
+        </button>
+        <button class="btn btn-sm btn-outline-success" data-filter="Completed">
+          Completed
+        </button>
+        <button class="btn btn-sm btn-outline-dark" data-filter="OK" onclick="window.location.href='/Filter_Ok_Task'">
+          OK.
+        </button>
+      </div>
+
+
+      <div class="btn-group" role="group" id="Status_List">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+          Status
+        </button>
+        <ul class="dropdown-menu">
+          <li>
+            <button class="btn btn-sm btn-outline-primary active" data-filter="all" onclick="window.location.href='/'"
+              style="width: 100%;">
+              All
+            </button>
+          </li>
+          <li>
+            <button class="btn btn-sm btn-outline-warning" data-filter="Pending" style="width: 100%;">
+              Pending
+            </button>
+          </li>
+
+          <li>
+            <button class="btn btn-sm btn-outline-info" data-filter="Delayed" style="width: 100%;">
+              Delayed
+            </button>
+          </li>
+
+          <li>
+            <button class="btn btn-sm btn-outline-danger" data-filter="Overdue" style="width: 100%;">
+              Overdue
+            </button>
+          </li>
+
+          <li>
+            <button class="btn btn-sm btn-outline-success" data-filter="Completed" style="width: 100%;">
+              Completed
+            </button>
+          </li>
+
+          <li>
+            <button class="btn btn-sm btn-outline-dark" data-filter="OK"
+              onclick="window.location.href='/Filter_Ok_Task'" style="width: 100%;">
+              OK.
+            </button>
+          </li>
+
+        </ul>
+      </div>
+
 
     </div>
 
@@ -799,6 +849,7 @@ endblock %}
 <!--  *********************************** but name of user in delete form ******************** -->
 <script>
 
+
   function Del_Atr(Del_Atr_V, user_id_v) {
 
     let New_Del_Atr = document.getElementById("Delelet_Words")
@@ -869,6 +920,9 @@ endblock %}
   let Card_View_v = document.getElementById('card_view');
   let pationation_area_v = document.getElementById('pationation_area');
   let scrollPageBtn_v = document.getElementById('scrollPageBtn');
+
+
+
   // Add an event listener to the checkbox
 
   Table_View_check_v.addEventListener('change', () => {
@@ -885,6 +939,7 @@ endblock %}
 
       Card_View_v.style.display = 'none';
       Card_View_check_v.checked = false;
+
       scrollPageBtn_v.style.display = 'block';
 
       localStorage.setItem("Table_View_local", "Yes")
@@ -892,6 +947,7 @@ endblock %}
     } else {
 
       Table_View_v.style.display = 'none';
+
       if (localStorage.getItem("scroll_Paging") === "no") {
         pationation_area_v.style.display = 'block';
       } else {
@@ -948,6 +1004,7 @@ endblock %}
 
     Card_View_v.style.display = 'none';  // Show the element
     Table_View_v.style.display = 'block';
+
     if (localStorage.getItem("scroll_Paging") === "no") {
       pationation_area_v.style.display = 'block';
     } else {
@@ -1019,6 +1076,40 @@ endblock %}
     });
   });
 
+
+
+  const mediaQuery = window.matchMedia('(max-width: 1700px)');
+
+  function handlChange(e) {
+    if (e.matches) {
+      Card_View_v.style.display = 'block';  // Show the element
+      Table_View_v.style.display = 'none';
+
+      pationation_area_v.style.display = 'none';
+
+      Table_View_check_v.checked = false;
+      scrollPageBtn_v.style.display = 'none';
+      Card_View_check_v.checked = true;
+      Table_View_check_v.checked = false;  // screen width ≤ 1700px
+    } else {
+
+      Card_View_v.style.display = 'none';  // Show the element
+      Table_View_v.style.display = 'block';
+
+      pationation_area_v.style.display = 'block';
+
+      Table_View_check_v.checked = true;
+      scrollPageBtn_v.style.display = 'block';
+      Card_View_check_v.checked = false;
+      Table_View_check_v.checked = true;      // > 1700px
+    }
+  }
+
+  // Initial check
+  handlChange(mediaQuery);
+
+  // Listen for changes
+  mediaQuery.addEventListener('change', handlChange);
 
 </script>
 {% endblock %}

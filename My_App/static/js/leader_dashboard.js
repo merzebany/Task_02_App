@@ -359,10 +359,7 @@
         const tableView = document.getElementById("table_view");
         const icon_v01 = document.getElementById("icon_v01");
       
-    
-
-    
-       pationationArea.style.display = 'block';
+        pationationArea.style.display = 'block';
         tableView.style.overflowY = 'hidden';   
         tableView.style.overflowX = 'hidden';
         tableView.style.maxHeight = '60vh';

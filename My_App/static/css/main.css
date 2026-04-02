@@ -320,6 +320,12 @@
 
  }
 
+
+ #Status_List {
+   display: none;
+ }
+
+
  @media (max-width: 1700px) {
 
 .status-badge-icon {
@@ -348,4 +354,16 @@
   display: none;
  }
 
+
+
+ #Status_btns {
+  display: none;
+ }
+
+ #Status_List {
+  display: block;
+ }
+
 }
+
+
