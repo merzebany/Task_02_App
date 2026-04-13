@@ -1,5 +1,5 @@
 # app.py
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
+from flask import Flask, json, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import datetime, timedelta
@@ -159,7 +159,7 @@ def dashboard():
     # return render_template('Test.html')
     #   now = datetime.utcnow()
 
-      now = datetime.now().replace(microsecond=0)
+      now = datetime.now().replace(second=0, microsecond=0)
 
       if current_user.role == 'leader':
         # Get all tasks created by this leader
@@ -174,9 +174,11 @@ def dashboard():
 
           from DataBase import Overdue_Tasks
           Overdue_Tasks_V = Overdue_Tasks(current_user.id,now)
-        
           
-          return render_template('leader_dashboard.html', tasks=Task_data, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V, projects = projects )
+          from DataBase import Log_for_Task_assigned_by_CurrentUser
+          Logs_List = Log_for_Task_assigned_by_CurrentUser(current_user.id)
+         
+          return render_template('leader_dashboard.html', tasks=Task_data, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V, projects = projects ,Logs_Lists=Logs_List )
       
       else:
           from DataBase import Task_assigned_to_CurrentUser
@@ -184,11 +186,14 @@ def dashboard():
          
           from DataBase import project_table
           projects = project_table()
-
-          return render_template('member_tasks.html', tasks=Task_data, now=now, projects=projects )
+         
+          from DataBase import Log_for_Task_assigned_to_CurrentUser
+          Logs_List = Log_for_Task_assigned_to_CurrentUser(current_user.id)
+          
+          return render_template('member_tasks.html', tasks=Task_data, now=now, projects=projects ,Logs_Lists=Logs_List )
 
 #**************************************************************************************************************
-#*******************************      assign-task        ******************************************************
+#*******************************      add assign-task        ******************************************************
 #**************************************************************************************************************
 
 @app.route('/assign-task', methods=['GET', 'POST'])
@@ -224,7 +229,7 @@ def assign_task():
         
 
         from DataBase import ADD_Task
-        ADD_Task(title, description, assigned_to_id,assigned_by_id, start_date, original_end_date, current_deadline, status, datetime.now().replace(microsecond=0),Project_id)
+        ADD_Task(title, description, assigned_to_id,assigned_by_id, start_date, original_end_date, current_deadline, status, datetime.now().replace(second=0,microsecond=0),Project_id)
 
        # ****************************************
 
@@ -439,6 +444,7 @@ def delete_user():
 # ****************************************************************************************************************
 # ****************************     Cahnge password  User     *****************************************************
 # ****************************************************************************************************************
+
 @app.route('/api/ConfirmforchangePassword', methods=['GET', 'POST'])
 
 def ConfirmforchangePassword():
@@ -499,7 +505,7 @@ def Filter_Data_ByMember():
 
    Filter_by_member_v = request.args.get('TT')
 #    now = datetime.utcnow()
-   now = datetime.now().replace(microsecond=0)    
+   now = datetime.now().replace(second=0, microsecond=0)    
       
         # Get all tasks created by this leader
    from DataBase import Task__assigned_by_member
@@ -513,9 +519,11 @@ def Filter_Data_ByMember():
 
    from DataBase import Overdue_Tasks
    Overdue_Tasks_V = Overdue_Tasks(current_user.id,now)
-
+   
+   from DataBase import Log_for_Task_assigned_by_CurrentUser
+   Logs_List = Log_for_Task_assigned_by_CurrentUser(current_user.id)
           
-   return render_template('leader_dashboard.html', tasks=Task_data, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V, projects = projects)
+   return render_template('leader_dashboard.html', tasks=Task_data, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V, projects = projects ,Logs_Lists=Logs_List)
    
 # ****************************************************************************************************************
 # ****************************    Search data task     ***********************************************************
@@ -529,7 +537,7 @@ def Search_Fun():
    search_v = request.args.get('search_v')
 
 #    now = datetime.utcnow()
-   now = datetime.now().replace(microsecond=0)   
+   now = datetime.now().replace(second=0, microsecond=0)   
    
    if current_user.role == 'leader':
         
@@ -544,21 +552,26 @@ def Search_Fun():
 
           from DataBase import Overdue_Tasks
           Overdue_Tasks_V = Overdue_Tasks(current_user.id,now)
-          print(now)
           
-          return render_template('leader_dashboard.html', tasks=Filter_tasks_V, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V,projects = projects )
+          from DataBase import Log_for_Task_assigned_by_CurrentUser
+          Logs_List = Log_for_Task_assigned_by_CurrentUser(current_user.id)
+          
+          return render_template('leader_dashboard.html', tasks=Filter_tasks_V, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V,projects = projects ,Logs_Lists=Logs_List )
    else:
           from DataBase import Filter_Task_assigned_to_CurrentUser
           Task_data = Filter_Task_assigned_to_CurrentUser(search_v,current_user.id)
           
           from DataBase import project_table
           projects = project_table()
+          
+          from DataBase import Log_for_Task_assigned_to_CurrentUser
+          Logs_List = Log_for_Task_assigned_to_CurrentUser(current_user.id)
 
-          return render_template('member_tasks.html', tasks=Task_data, now=now, projects=projects )
+          return render_template('member_tasks.html', tasks=Task_data, now=now, projects=projects ,Logs_Lists=Logs_List )
    
    
 # ****************************************************************************************************************
-# ****************************     Dec task update    ***************************************************************
+# ****************************     Dec task update    ************************************************************
 # ****************************************************************************************************************
 
 @app.route('/DecTask/<int:task_id>/<string:status>', methods=['GET', 'POST'])
@@ -588,7 +601,7 @@ def DecTask(task_id, status):
 @leader_required
 def Filter_Ok_Task():
 
-   now = datetime.now().replace(microsecond=0)
+   now = datetime.now().replace(second=0, microsecond=0)
       
    if current_user.role == 'leader':
         # Get all tasks created by this leader
@@ -603,9 +616,11 @@ def Filter_Ok_Task():
    
           from DataBase import Overdue_Tasks_Filter_Ok
           Overdue_Tasks_V = Overdue_Tasks_Filter_Ok(current_user.id)
+          
+          from DataBase import Log_for_Task_assigned_by_CurrentUser
+          Logs_List = Log_for_Task_assigned_by_CurrentUser(current_user.id)
 
-
-          return render_template('leader_dashboard.html', tasks=Task_data, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V, projects = projects )
+          return render_template('leader_dashboard.html', tasks=Task_data, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V, projects = projects ,Logs_Lists=Logs_List )
          
    return redirect(url_for('dashboard'))
 
@@ -653,7 +668,7 @@ def update_task(task_id):
     if action == 'complete':
         
         status = 'completed'
-        completed_at = datetime.now().replace(microsecond=0)
+        completed_at = datetime.now().replace(second=0, microsecond=0)
         requires_leader_attention = False
         
         from DataBase import update_Task_status
@@ -696,16 +711,27 @@ def update_task(task_id):
         reason = request.form['reason']
         new_deadline_str = request.form['new_deadline']
         new_deadline = datetime.strptime(new_deadline_str, '%Y-%m-%dT%H:%M')
-        
+
+        old_deadline_V1 = request.form['old_Deadline']
+        old_deadline_V = datetime.strptime(old_deadline_V1, '%Y-%m-%dT%H:%M')
+
+        delay_task_log_V = request.form['delay_task_log']
+        task_id_V = request.form['task_id']
+
         # Validate new deadline
-        if new_deadline <= datetime.now().replace(microsecond=0):
+        if new_deadline <= datetime.now().replace(second=0, microsecond=0):
             flash('New deadline must be in the future', 'danger')
             return redirect(url_for('dashboard'))
         
         status = 'delayed'
         reason_for_delay = reason
         current_deadline = new_deadline
-        requires_leader_attention = True  # Flag for leader notification
+        requires_leader_attention = True 
+        
+        
+        if delay_task_log_V not in (None, 'None', 'none', '', 'NULL'):
+           from DataBase import ADD_to_Log_Table
+           ADD_to_Log_Table(old_deadline_V, delay_task_log_V, task_id_V)
 
         from DataBase import update_Task_status_delay
         requires_leader_attention = False
@@ -770,7 +796,7 @@ def resolve_task(task_id):
     
     if action == 'complete':
         status = 'completed'
-        completed_at = datetime.now().replace(microsecond=0)
+        completed_at = datetime.now().replace(second=0, microsecond=0)
         
         requires_leader_attention = False
         
@@ -781,7 +807,7 @@ def resolve_task(task_id):
         new_deadline_str = request.form['new_deadline']
         new_deadline = datetime.strptime(new_deadline_str, '%Y-%m-%dT%H:%M')
         
-        if new_deadline <= datetime.now().replace(microsecond=0):
+        if new_deadline <= datetime.now().replace(second=0, microsecond=0):
             return jsonify({'success': False, 'message': 'New deadline must be in the future'}), 400
         
         from DataBase import update_Task_status_postpone
@@ -911,7 +937,7 @@ def Search_Projects():
 # @leader_required
 def get_overdue_tasks():
 
-    now = datetime.now().replace(microsecond=0)
+    now = datetime.now().replace(second=0, microsecond=0)
 
 
     if current_user.role == 'leader' :
@@ -1124,32 +1150,33 @@ def check_notifications():
 @app.route('/Filter_Advance', methods = ['POST'])
 
 @login_required
-
+ 
 
 def Filter_Advance():
  
   Filter_projectName = request.form.get('Project_V')
   Filter_member_name = request.form.get('assigned_to')
+  Filter_status = request.form.get('status')
 
   Filter_from_end_date = request.form.get('from_end_date')
   if Filter_from_end_date != '' :
-    from_end_date_str = datetime.strptime(Filter_from_end_date, '%Y-%m-%dT%H:%M').replace(microsecond=0) 
+    from_end_date_str = datetime.strptime(Filter_from_end_date, '%Y-%m-%dT%H:%M').replace(second=0, microsecond=0) 
   else :
     from_end_date_str = ''
 
   Filter_to_end_date = request.form.get('to_end_date')
   if Filter_to_end_date  !=  '' :
-     to_end_date_str = datetime.strptime(Filter_to_end_date, '%Y-%m-%dT%H:%M').replace(microsecond=0) 
+     to_end_date_str = datetime.strptime(Filter_to_end_date, '%Y-%m-%dT%H:%M').replace(second=0, microsecond=0) 
   else :
     to_end_date_str = ''
  
-  now = datetime.now().replace(microsecond=0)
+  now = datetime.now().replace(second=0, microsecond=0)
 
 
 
   if current_user.role == 'leader':
     from DataBase import Task_assigned_by_AdvanceFilter
-    Task_data = Task_assigned_by_AdvanceFilter (Filter_projectName, Filter_member_name, from_end_date_str, to_end_date_str)
+    Task_data = Task_assigned_by_AdvanceFilter (Filter_projectName, Filter_member_name, from_end_date_str, to_end_date_str,Filter_status,current_user.id)
 
     from DataBase import user_member
     members = user_member()
@@ -1159,20 +1186,129 @@ def Filter_Advance():
 
     from DataBase import Overdue_Tasks
     Overdue_Tasks_V = Overdue_Tasks(current_user.id,now)
- 
+    
+    from DataBase import Log_for_Task_assigned_by_CurrentUser
+    Logs_List = Log_for_Task_assigned_by_CurrentUser(current_user.id)
 
-    return render_template('leader_dashboard.html', tasks=Task_data, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V, projects = projects )
+    return render_template('leader_dashboard.html', tasks=Task_data, members=members,now=now , Overdue_Tasks_V=Overdue_Tasks_V, projects = projects ,Logs_Lists=Logs_List)
  
  
   else:
           from DataBase import Task_assigned_to_AdvanceFilter
-          Task_data = Task_assigned_to_AdvanceFilter(Filter_projectName, Filter_member_name, from_end_date_str, to_end_date_str,current_user.id)
-          
+          Task_data = Task_assigned_to_AdvanceFilter(Filter_projectName, Filter_member_name, from_end_date_str, to_end_date_str,current_user.id,Filter_status)
+
+         
           from DataBase import project_table
           projects = project_table()
+          
+          from DataBase import Log_for_Task_assigned_to_CurrentUser
+          Logs_List = Log_for_Task_assigned_to_CurrentUser(current_user.id)
 
-          return render_template('member_tasks.html', tasks=Task_data, now=now, projects=projects )
+          return render_template('member_tasks.html', tasks=Task_data, now=now, projects=projects ,Logs_Lists=Logs_List )
    
+
+
+
+
+
+# ****************************************************************************************************************
+# ****************************************************************************************************************
+# ****************************     gantt chart    ****************************************************************
+# ****************************************************************************************************************
+
+@app.route('/Gantt_Chart',  methods=['GET', 'POST'])
+
+@login_required
+@leader_required
+
+def Gantt_Chart():
+   
+    from DataBase import Gantt_Chart 
+    Gantt_Chart_V = Gantt_Chart(current_user.id)
+
+    from DataBase import user_member
+    members = user_member()
+          
+    from DataBase import project_table
+    projects = project_table()
+    
+    Gantt_Chart_V1 = [{
+                                    
+              'title': task['title'], 
+              'description': task['description'],
+              'assigned_by_id': task['assigned_by_id'],
+              'start_date': task['start_date'].strftime('%Y-%m-%d'),
+              'current_deadline': task['current_deadline'].strftime('%Y-%m-%d'),
+              'original_end_date': task['original_end_date'].strftime('%Y-%m-%d'),
+              'project_name': task['project_name']
+               } for task in Gantt_Chart_V]
+      
+     
+    return render_template('gantt_chart.html', Gantt_Chart__Py=json.dumps(Gantt_Chart_V1),members=members,projects = projects)
+
+
+
+# ****************************************************************************************************************
+# ****************************         gantt Filter        *******************************************************
+# ****************************************************************************************************************
+
+@app.route('/Gantt_Filter', methods = ['POST'])
+
+@login_required
+@leader_required
+
+def Gantt_Filter():
+   
+   Filter_projectName = request.form.get('Project_V')
+   Filter_member_name = request.form.get('assigned_to')
+   Filter_status = request.form.get('status')
+
+   Filter_from_end_date = request.form.get('from_end_date')
+   if Filter_from_end_date != '' :
+      from_end_date_str = datetime.strptime(Filter_from_end_date, '%Y-%m-%dT%H:%M').replace(second=0, microsecond=0) 
+   else :
+        from_end_date_str = ''
+
+   Filter_to_end_date = request.form.get('to_end_date')
+   if Filter_to_end_date  !=  '' :
+        to_end_date_str = datetime.strptime(Filter_to_end_date, '%Y-%m-%dT%H:%M').replace(second=0, microsecond=0) 
+   else :
+        to_end_date_str = ''
+ 
+   
+   from DataBase import user_member
+   members = user_member()
+          
+   from DataBase import project_table
+   projects = project_table()
+
+   from DataBase import Gantt_Chart_filter 
+   Gantt_Chart_V = Gantt_Chart_filter(Filter_projectName, Filter_member_name, from_end_date_str, to_end_date_str,Filter_status, current_user.id)
+   
+   Gantt_Chart_V1 = [{
+                                    
+              'title': task['title'], 
+              'description': task['description'],
+              'assigned_by_id': task['assigned_by_id'],
+              'start_date': task['start_date'].strftime('%Y-%m-%d'),
+              'current_deadline': task['current_deadline'].strftime('%Y-%m-%d'),
+              'original_end_date': task['original_end_date'].strftime('%Y-%m-%d'),
+              'project_name': task['project_name']
+               } for task in Gantt_Chart_V]
+      
+     
+   return render_template('gantt_chart.html', Gantt_Chart__Py=json.dumps(Gantt_Chart_V1),members=members,projects = projects)
+
+
+
+
+
+
+
+
+
+
+
 
 # ****************************************************************************************************************
 # ****************************   telegram massege    ***********************************************************
@@ -1186,7 +1322,7 @@ def Filter_Advance():
 
 # def send_telegram():
 
-#     now = datetime.now().replace(microsecond=0)
+#     now = datetime.now().replace(second=0, microsecond=0)
      
 #     success_count = 0
 #     error_details = []

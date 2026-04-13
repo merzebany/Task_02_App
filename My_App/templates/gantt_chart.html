@@ -1,0 +1,377 @@
+{% extends "base.html" %}
+{% block title %}Leader Dashboard - TaskFlow{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold"><i class="bi bi-bar-chart-steps"></i> Gantt Chart</h2>
+
+</div>
+
+
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span>Gantt Chart</span>
+
+    <div>
+      <button id="Filter_But" class="btn btn-sm btn-outline-danger  Filter_But" type="button" data-bs-placement="top"
+        data-bs-title="Filter Task" data-bs-toggle="modal" data-bs-target="#FilterModal">
+        <i class="bi bi-funnel"></i> Filter
+      </button>
+
+      <button class="btn btn-sm btn-outline-primary" data-filter="all" onclick="window.location.href='/Gantt_Chart'">
+        All
+      </button>
+
+    </div>
+
+  </div>
+
+  <div style="width: 99%; height: 75vh; overflow-y: auto; overflow-x: hidden;">
+    <div id="ganttChart_V">
+      <canvas id="ganttChart"></canvas>
+    </div>
+
+  </div>
+</div>
+
+
+
+
+<!-- **********************************************  Filter Modal **********************************************-->
+
+<div class="modal fade" id="FilterModal" tabindex="-1" aria-labelledby="FilterModal" aria-hidden="true">
+  <div class="modal-dialog">
+
+    <div class="modal-content">
+
+      <form method="POST" action="{{ url_for('Gantt_Filter') }}" style="display:inline;">
+
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Filter Task</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+
+        <div class="modal-body">
+          Choose Filter Prameter
+
+          <hr>
+
+          <label for="Project_V" class="form-label fw-bold">Project</label>
+          <select class="form-select" id="Project_V" name="Project_V" dir="rtl">
+            <option value="">اختار اسم المشروع .....</option>
+            {% for project in projects %}
+            <option value="{{ project.project_id }}"> {{ project.project_name }}</option>
+            {% endfor %}
+          </select>
+          <div id="modalbody" dir="rtl"></div>
+          <hr>
+
+          <label for="assigned_to" class="form-label fw-bold">Assign To</label>
+          <select class="form-select" id="assigned_to" name="assigned_to" dir="rtl">
+            <option value="">اختار المسؤول عن النشاط .....</option>
+            {% for member in members %}
+            <option value="{{ member.user_id }}"> {{ member.full_name }} ({{ member.username }})</option>
+            {% endfor %}
+          </select>
+          <hr>
+
+          <label for="status" class="form-label fw-bold">Status</label>
+          <select class="form-select" id="status" name="status">
+            <option value="">Select status..........</option>
+            <option value="pending">pending</option>
+            <option value="delayed">delayed</option>
+            <option value="completed">completed</option>
+          </select>
+
+          <hr>
+
+          <label for="from_end_date" class="form-label fw-bold">End Date (Deadline) Between</label>
+          <input type="datetime-local" class="form-control mb-3" id="from_end_date" name="from_end_date">
+          <input type="datetime-local" class="form-control" id="to_end_date" name="to_end_date">
+          <hr>
+
+        </div>
+
+        <div class="modal-footer">
+
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary"> <i class="fas fa-trash"></i> Apply Filter
+          </button>
+          <hr>
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+
+  // Data passed from Flask
+  let Task_data = JSON.parse({{ Gantt_Chart__Py | tojson  }})
+
+
+  const todayDate = new Date().toISOString().split('T')[0];
+  // 1. Calculate required height
+  const rowHeight = 100; // pixels per task
+  const chartHeight = Task_data.length * rowHeight;
+  console.log(`Calculated chart height: ${chartHeight}px for ${Task_data.length} tasks.`);
+  // 2. Apply height to canvas element BEFORE initializing Chart.js
+  const canvas = document.getElementById('ganttChart_V');
+  canvas.style.height = chartHeight + 'px';
+
+
+  const data = {
+    datasets: [{
+      label: 'Project Schedule',
+      data: Task_data.map(t => {
+
+        //  *****************************************************************
+
+        function breakTextAfter50(str) {
+          if (str.length <= 50) return str;
+
+          let spaceIndex = str.indexOf(' ', 50);
+          console.log(spaceIndex)
+          if (spaceIndex === -1) {
+            return str;
+          }
+
+          // Insert <br> at that space (remove the space or keep it?)
+          // Option 1: keep the space at start of second line
+          //return str.slice(0, spaceIndex) + '-/-' + str.slice(spaceIndex + 1);
+
+          // Option 2: keep the space at end of first line (uncomment below)
+          return str.slice(0, spaceIndex + 1) + '-/-' + str.slice(spaceIndex + 1);
+        }
+
+        // Usage
+        let longText = t.description;
+        let formattedText = breakTextAfter50(longText);
+        console.log(formattedText); // This will show the text with '-/-' where the break occurs
+
+        //  *****************************************************************
+
+        let Y_value1 = `${t.project_name}-/-${t.title}-/-${formattedText}`; // Use an array for multi-line labels -->
+
+
+        return {
+          x: [t.start_date, t.current_deadline],
+          y: Y_value1, // Now an array or a string
+          yAxisID: 'left-y-axis',
+          originalEnd: t.current_deadline
+        };
+      }),
+
+      // Scriptable color logic
+      backgroundColor: (ctx) => {
+        const raw = ctx.raw;
+        if (!raw) return 'rgba(0, 124, 83, 0.5)'; // Default fallback
+
+        const endDate = raw.x[1]; // Gets the 'end' value from the [start, end] array
+
+        // Compare dates: If end date is strictly before today
+        if (endDate < todayDate) {
+          return 'rgba(255, 0, 0, 1)'; // Red for "Overdue" or "Past"
+        }
+        return 'rgba(0, 124, 83, 0.5)';   // Green for "On Track"
+      },
+
+      borderColor: (ctx) => {
+        const endDate = ctx.raw ? ctx.raw.x[1] : null;
+        return endDate < todayDate ? 'rgba(150, 0, 0, 1)' : 'rgba(1, 36, 24, 1)';
+      },
+      borderWidth: 1,
+      barThickness: 20,
+      borderSkipped: false,
+      padding: 20,
+      barPercentage: 0.8, // Adjusts thickness of bars
+      categoryPercentage: 0.8
+
+    },
+
+    {
+      label: 'Target Project Schedule',
+      data: Task_data.map(t => {
+
+        //  *****************************************************************
+
+        function breakTextAfter50(str) {
+          if (str.length <= 50) return str;
+
+          let spaceIndex = str.indexOf(' ', 50);
+          console.log(spaceIndex)
+          if (spaceIndex === -1) {
+            return str;
+          }
+
+          // Insert <br> at that space (remove the space or keep it?)
+          // Option 1: keep the space at start of second line
+          //return str.slice(0, spaceIndex) + '-/-' + str.slice(spaceIndex + 1);
+
+          // Option 2: keep the space at end of first line (uncomment below)
+          return str.slice(0, spaceIndex + 1) + '-/-' + str.slice(spaceIndex + 1);
+        }
+
+        // Usage
+        let longText = t.description;
+        let formattedText = breakTextAfter50(longText);
+        console.log(formattedText); // This will show the text with '-/-' where the break occurs
+
+        //  *****************************************************************
+
+        let Y_value1 = `${t.project_name}-/-${t.title}-/-${formattedText}`; // Use an array for multi-line labels -->
+
+
+
+
+        //let Y_value1 = `${t.project_name}-/-${t.title}-/-${t.description}`;
+
+
+        return {
+          x: [t.start_date, t.original_end_date],
+          y: Y_value1, // Now an array or a string
+          yAxisID: 'left-y-axis'
+        };
+      }),
+
+      backgroundColor: 'rgba(200, 0, 0, 0.5)',
+      borderColor: 'rgba(100, 0, 0, 1)',
+      borderWidth: 1,
+      barThickness: 10,
+      borderSkipped: false,
+      barPercentage: 0.8, // Adjusts thickness of bars
+      categoryPercentage: 0.8
+    }]
+
+  };
+
+  const today = new Date().toISOString().split('T')[0];
+
+  //  to make min date 20 days ago from today
+  const today2 = new Date();
+  const twentyDaysAgo = new Date(today2);
+  twentyDaysAgo.setDate(today2.getDate() - 20);
+
+  // Format as YYYY-MM-DD (local timezone, date-only)
+  const minDate = twentyDaysAgo.toISOString().split('T')[0];
+  //*************************************************************************
+
+  const config = {
+    type: 'bar',
+    data: data,
+    options: {
+      maintainAspectRatio: false,
+      indexAxis: 'y',
+      scales: {
+
+        x: {
+          type: 'time',
+          time: { unit: 'day' },
+          min: minDate,
+          position: 'top',
+          ticks: {
+            autoSkip: false, // Ensure all labels show up
+            maxRotation: 90,
+            minRotation: 0,
+            padding: 10,  // Adds brea
+            font: {
+              weight: 600,
+              size: 15,
+              // Slightly smaller font helps with multi-line layout
+            }
+          }
+        },
+
+        y: {
+          type: 'category',
+
+          ticks: {
+            autoSkip: false,
+            maxRotation: 0,
+            minRotation: 0,
+            padding: 15,
+            font: {
+              weight: 600,  // Reduced from 1000 (invalid value)
+              size: 15,
+              lineHeight: 1.2  // Better spacing for multiline
+            },
+
+            callback: function (value) {
+              const label = this.getLabelForValue(value);
+              const parts = label.split('-/-');
+              return parts; // Return an array for multi-line labels 
+            }
+          }
+        }
+      },
+
+
+      plugins: {
+        // --- New Annotation Section ---
+        annotation: {
+          annotations: {
+            todayLine: {
+              type: 'line',
+              xMin: today,
+              xMax: today,
+              borderColor: 'rgb(255, 99, 132)',
+              borderWidth: 2,
+              borderDash: [6, 6], // Makes the line dashed
+              label: {
+                display: true,
+                content: 'Today',
+                position: 'start',
+                backgroundColor: 'rgba(255, 99, 132, 0.8)'
+              }
+            }
+          }
+        },
+        // --- Keep your existing tooltip code below ---
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              let start = ctx.raw.x[0];
+              let end = ctx.raw.x[1];
+              return `${ctx.dataset.label}: ${start} to ${end}`;
+            }
+          }
+        }
+      }
+    }
+  };
+
+  new Chart(document.getElementById('ganttChart'), config);
+
+
+
+  let filterModal = document.getElementById('FilterModal');
+  let modalbody_v = document.getElementById('modalbody')
+  // When the modal is fully shown, initialize TomSelect
+  filterModal.addEventListener('shown.bs.modal', function () {
+    // Get the select element
+    let projectSelect = document.getElementById('Project_V');
+
+    // Check if TomSelect is already initialized on this element
+    if (projectSelect.tomselect) {
+      projectSelect.tomselect.destroy(); // destroy existing instance
+    }
+
+    // Initialize TomSelect
+    new TomSelect(projectSelect, {
+      placeholder: 'اختار اسم المشروع .....',
+      searchField: ['text'],
+      create: false,
+      dropdownParent: modalbody_v,
+      maxOptions: 1000
+    });
+  });
+
+</script>
+
+
+{% endblock %}

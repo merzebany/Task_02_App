@@ -99,7 +99,8 @@ endblock %}
               {% set filtered_tasks_01 = [] %}
               {% for task in tasks %}
               {% if task.status == 'pending' and task.current_deadline > now and task.status !='completed' %}
-              {% set filtered_tasks_01=filtered_tasks_01.append(task) %} {% endif %} {% endfor %} {{
+              {% set filtered_tasks_01=filtered_tasks_01.append(task) %} {% endif %}
+              {% endfor %} {{
               filtered_tasks_01|length }}
             </h2>
 
@@ -492,7 +493,7 @@ endblock %}
 
                 <span><strong
                     class="{% if task.current_deadline < now and task.status != 'completed' %}text-danger{% endif %}">
-                    {{ task.current_deadline.strftime('%d %b, %Y at %I:%M %p') }}
+                    {{ task.current_deadline.strftime('%d %b, %Y') }}
                   </strong>
                   : &nbsp;تاريخ نهاية النشاط &nbsp;&nbsp; </span>
                 <i class="bi bi-alarm text-danger me-2"></i>
@@ -503,11 +504,21 @@ endblock %}
 
 
             {% if task.status == 'delayed' and task.reason_for_delay %}
-            <div class="alert alert-warning p-2 mb-3" dir="rtl">
-              <i class="bi bi-info-circle me-1"></i> <strong>&nbsp; اسباب التأجيل : &nbsp; </strong> {{
-              task.reason_for_delay|truncate(250)
-              }}
+            <div class="alert alert-warning p-2 d-flex justify-content-between align-items-start  mb-3" dir="rtl">
+              <div>
+                <i class="bi bi-info-circle me-1"></i> <strong>&nbsp; اسباب التأجيل : &nbsp; </strong> {{
+                task.reason_for_delay|truncate(250)
+                }}
+              </div>
+
+              <input type="hidden" id="log-task-id" name="task_id" value="{{ task.task_id }}">
+              <button class="btn btn-sm btn-outline-secondary" data-task-id="{{ task.task_id }}" type="button"
+                data-bs-toggle="modal" data-bs-target="#taskLogModal">
+                <i class="bi bi-eye me-1"></i> View Log
+              </button>
+
             </div>
+
             {% endif %}
 
 
@@ -782,6 +793,15 @@ endblock %}
             <option value="{{ member.user_id }}"> {{ member.full_name }} ({{ member.username }})</option>
             {% endfor %}
           </select>
+          <hr>
+
+          <label for="status" class="form-label fw-bold">Status</label>
+          <select class="form-select" id="status" name="status">
+            <option value="">Select status..........</option>
+            <option value="pending">pending</option>
+            <option value="delayed">delayed</option>
+            <option value="completed">completed</option>
+          </select>
 
           <hr>
 
@@ -807,6 +827,53 @@ endblock %}
 
   </div>
 </div>
+
+<!-- ************************************** Log Details Modal ********************************************* -->
+
+<div class="modal fade" id="taskLogModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-end" id="task-log-title" dir="rtl">اسباب التاجيل</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+
+        <input type="hidden" id="log-task-id" name="task_id">
+        <table class="table table-hover mb-0" id="data-table" dir="rtl">
+
+          <thead style="position: sticky; top: 0;z-index: 1;">
+            <tr style="background: #90AB8B; position: sticky; top: 0;z-index: 1;">
+
+              <th class="text-center" style="background: #90AB8B; width: 10%;">#</th>
+              <th style="background: #90AB8B; width: 65%;" dir="rtl">سبب التاجيل</th>
+              <th class="text-center" style="background: #90AB8B; width: 25%; ">تاريخ التأجيل</th>
+
+            </tr>
+          </thead>
+          <tbody id="logs-tbody">
+
+            {% for log in Logs_Lists %}
+
+            <tr class="task-row" data-task-id="{{ log.task_id }}">
+              <td class="text-center">--</td>
+              <td class="text-left">{{ log.log_text }}</td>
+              <td class="text-center" dir="ltr">{{ log.log_current_deadline.strftime('%d %b, %Y') }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 
 <!--  ***************************** Pationation Area ********************************************** -->
@@ -922,9 +989,6 @@ endblock %}
   let scrollPageBtn_v = document.getElementById('scrollPageBtn');
 
 
-
-  // Add an event listener to the checkbox
-
   Table_View_check_v.addEventListener('change', () => {
 
     if (Table_View_check_v.checked) {
@@ -965,7 +1029,6 @@ endblock %}
   });
 
 
-
   Card_View_check_v.addEventListener('change', () => {
     if (Card_View_check_v.checked) {
 
@@ -1000,53 +1063,60 @@ endblock %}
   });
 
 
-  if (localStorage.getItem("Table_View_local") === "Yes") {
 
-    Card_View_v.style.display = 'none';  // Show the element
-    Table_View_v.style.display = 'block';
 
-    if (localStorage.getItem("scroll_Paging") === "no") {
-      pationation_area_v.style.display = 'block';
+  document.addEventListener("DOMContentLoaded", function () {
+
+
+    if (localStorage.getItem("Table_View_local") === "Yes") {
+
+
+      Card_View_v.style.display = 'none';  // Show the element
+      Table_View_v.style.display = 'block';
+
+      if (localStorage.getItem("scroll_Paging") === "no") {
+        pationation_area_v.style.display = 'block';
+      } else {
+        pationation_area_v.style.display = 'none';
+      }
+      Table_View_check_v.checked = true;
+      scrollPageBtn_v.style.display = 'block';
+
+
     } else {
+
+      Card_View_v.style.display = 'block';  // Show the element
+      Table_View_v.style.display = 'none';
       pationation_area_v.style.display = 'none';
-    }
-    Table_View_check_v.checked = true;
-    scrollPageBtn_v.style.display = 'block';
+      Table_View_check_v.checked = false;
+      scrollPageBtn_v.style.display = 'none';
+
+    };
+
+    if (localStorage.getItem("Card_View_local") === "Yes") {
 
 
-  } else {
+      Card_View_v.style.display = 'block';  // Show the element
+      Table_View_v.style.display = 'none';
+      pationation_area_v.style.display = 'none';
+      Card_View_check_v.checked = true;
+      scrollPageBtn_v.style.display = 'none';
 
-    Card_View_v.style.display = 'block';  // Show the element
-    Table_View_v.style.display = 'none';
-    pationation_area_v.style.display = 'none';
-    Table_View_check_v.checked = false;
-    scrollPageBtn_v.style.display = 'none';
-
-  };
-
-  if (localStorage.getItem("Card_View_local") === "Yes") {
-
-    Card_View_v.style.display = 'block';  // Show the element
-    Table_View_v.style.display = 'none';
-    pationation_area_v.style.display = 'none';
-    Card_View_check_v.checked = true;
-    scrollPageBtn_v.style.display = 'none';
-
-  } else {
-
-    Card_View_v.style.display = 'none';  // Show the element
-    Table_View_v.style.display = 'block';
-    if (localStorage.getItem("scroll_Paging") === "no") {
-      pationation_area_v.style.display = 'block';
     } else {
-      pationation_area_v.style.display = 'none';
-    }
-    Card_View_check_v.checked = false;
-    scrollPageBtn_v.style.display = 'block';
 
-  };
+      Card_View_v.style.display = 'none';  // Show the element
+      Table_View_v.style.display = 'block';
+      if (localStorage.getItem("scroll_Paging") === "no") {
+        pationation_area_v.style.display = 'block';
+      } else {
+        pationation_area_v.style.display = 'none';
+      }
+      Card_View_check_v.checked = false;
+      scrollPageBtn_v.style.display = 'block';
 
+    };
 
+  });
 
 </script>
 

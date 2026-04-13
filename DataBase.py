@@ -286,22 +286,26 @@ try:
 # **********************************************************************************************************
 
 
-   def Task_assigned_by_AdvanceFilter (Filter_projectName, Filter_member_name, from_end_date_str, to_end_date_str):
+   def Task_assigned_by_AdvanceFilter (Filter_projectName, Filter_member_name, from_end_date_str, to_end_date_str,Filter_status,current_user):
 
       cr = db.cursor(as_dict=True) 
 
 
-      if Filter_projectName != '' and  Filter_member_name == '' and from_end_date_str == '' and to_end_date_str == '' :
+      if Filter_projectName != '' and  Filter_member_name == '' and from_end_date_str == '' and to_end_date_str == '' and Filter_status == '':
        
         cr.execute(f"select * from Task_View where project_id = %s ORDER BY current_deadline ", (Filter_projectName,))
        
-      elif Filter_projectName == '' and Filter_member_name != '' and from_end_date_str == '' and to_end_date_str == '' :
+      elif Filter_projectName == '' and Filter_member_name != '' and from_end_date_str == '' and to_end_date_str == '' and Filter_status == '':
 
         cr.execute(f"select * from Task_View where assigned_to_user_id = %s ORDER BY current_deadline ", (Filter_member_name,))
 
-      elif Filter_projectName == '' and Filter_member_name == '' and from_end_date_str != '' and to_end_date_str != '' :
+      elif Filter_projectName == '' and Filter_member_name == '' and from_end_date_str != '' and to_end_date_str != '' and Filter_status == '':
 
         cr.execute(f"select * from Task_View where current_deadline between  %s and %s ORDER BY current_deadline", (from_end_date_str,to_end_date_str,))
+      
+      elif Filter_projectName == '' and Filter_member_name == '' and from_end_date_str == '' and to_end_date_str == '' and Filter_status != '' :
+
+        cr.execute(f"select * from Task_View where status = %s", (Filter_status,))
 
       elif Filter_projectName != '' and Filter_member_name != '' and from_end_date_str == '' and to_end_date_str == '' :
        
@@ -318,48 +322,74 @@ try:
       elif Filter_projectName != '' and Filter_member_name != '' and from_end_date_str != '' and to_end_date_str != '' :
            
            cr.execute(f"select * from Task_View where project_id = %s and assigned_to_user_id = %s and current_deadline between  %s and %s ORDER BY current_deadline ", (Filter_projectName, Filter_member_name, from_end_date_str, to_end_date_str))
+       
+      elif Filter_projectName != '' and Filter_member_name == '' and from_end_date_str == '' and to_end_date_str == '' and Filter_status != '':
+       
+         cr.execute(f"select * from Task_View where project_id = %s and status = %s ORDER BY current_deadline", (Filter_projectName, Filter_status))
+      
+      elif Filter_projectName == '' and Filter_member_name != '' and from_end_date_str == '' and to_end_date_str == '' and Filter_status != '':
+       
+         cr.execute(f"select * from Task_View where assigned_to_user_id = %s and status = %s ORDER BY current_deadline", (Filter_member_name, Filter_status))
+      
+      else :
+         
+         cr.execute(f"select * from Task_View where assigned_by_id = %s  and Dec = 0 ORDER BY current_deadline ", (current_user))
 
+        
       return  cr.fetchall()
      
 
 
 # **********************************************************************************************************
 # ********************************  Search in Data Task filter by memeber **********************************
-# **********************************************************************************************************
+# **********************************************************************************************************   
 
 
-   def Task_assigned_to_AdvanceFilter (Filter_projectName, Filter_member_name, from_end_date_str, to_end_date_str, current_user):
+   def Task_assigned_to_AdvanceFilter (Filter_projectName, Filter_member_name, from_end_date_str, to_end_date_str, current_user,Filter_status):
 
       cr = db.cursor(as_dict=True) 
 
 
-      if Filter_projectName != '' and  Filter_member_name == '' and from_end_date_str == '' and to_end_date_str == '' :
+      if Filter_projectName != '' and  Filter_member_name == '' and from_end_date_str == '' and to_end_date_str == '' and Filter_status=='':
        
         cr.execute(f"select * from Task_View where assigned_to_id = %s and project_id = %s ORDER BY current_deadline ", (current_user,Filter_projectName,))
        
-      elif Filter_projectName == '' and Filter_member_name != '' and from_end_date_str == '' and to_end_date_str == '' :
+      # elif Filter_projectName == '' and Filter_member_name != '' and from_end_date_str == '' and to_end_date_str == '' and Filter_status=='':
 
-        cr.execute(f"select * from Task_View where assigned_to_user_id = %s ORDER BY current_deadline ", (Filter_member_name,))
+      #   cr.execute(f"select * from Task_View where assigned_to_id = %s ORDER BY current_deadline ", (Filter_member_name,))
 
-      elif Filter_projectName == '' and Filter_member_name == '' and from_end_date_str != '' and to_end_date_str != '' :
+      elif Filter_projectName == '' and Filter_member_name == '' and from_end_date_str != '' and to_end_date_str != '' and Filter_status == '':
 
         cr.execute(f"select * from Task_View where assigned_to_id = %s and current_deadline between  %s and %s ORDER BY current_deadline", (current_user, from_end_date_str, to_end_date_str))
 
-      elif Filter_projectName != '' and Filter_member_name != '' and from_end_date_str == '' and to_end_date_str == '' :
+      elif  Filter_projectName == '' and  Filter_member_name == '' and from_end_date_str == '' and to_end_date_str == '' and Filter_status !='':
        
-         cr.execute(f"select * from Task_View where project_id = %s and assigned_to_user_id = %s ORDER BY current_deadline", (Filter_projectName, Filter_member_name))
+        cr.execute(f"select * from Task_View where assigned_to_id = %s and status = %s ORDER BY current_deadline ", (current_user, Filter_status))
+       
+
+      # elif Filter_projectName != '' and Filter_member_name != '' and from_end_date_str == '' and to_end_date_str == '' and Filter_status=='' :
+       
+      #    cr.execute(f"select * from Task_View where project_id = %s and assigned_to_id = %s ORDER BY current_deadline", (Filter_projectName, Filter_member_name))
       
-      elif Filter_projectName != '' and Filter_member_name == '' and from_end_date_str != '' and to_end_date_str != '' :
+      elif Filter_projectName != '' and Filter_member_name == '' and from_end_date_str != '' and to_end_date_str != '' and Filter_status == '' :
      
          cr.execute(f"select * from Task_View where assigned_to_id = %s and project_id = %s and current_deadline between  %s and %s ORDER BY current_deadline ", (current_user, Filter_projectName, from_end_date_str, to_end_date_str))
 
-      elif Filter_projectName == '' and Filter_member_name != '' and from_end_date_str != '' and to_end_date_str != '' :
+      # elif Filter_projectName == '' and Filter_member_name != '' and from_end_date_str != '' and to_end_date_str != '' and Filter_status == '' :
            
-           cr.execute(f"select * from Task_View where assigned_to_user_id = %s and current_deadline between  %s and %s ORDER BY current_deadline ", (Filter_member_name, from_end_date_str, to_end_date_str))
+      #      cr.execute(f"select * from Task_View where assigned_to_id = %s and current_deadline between  %s and %s ORDER BY current_deadline ", (Filter_member_name, from_end_date_str, to_end_date_str))
 
-      elif Filter_projectName != '' and Filter_member_name != '' and from_end_date_str != '' and to_end_date_str != '' :
+      # elif Filter_projectName != '' and Filter_member_name != '' and from_end_date_str != '' and to_end_date_str != '' and Filter_status == '' :
            
-           cr.execute(f"select * from Task_View where project_id = %s and assigned_to_user_id = %s and current_deadline between  %s and %s ORDER BY current_deadline ", (Filter_projectName, Filter_member_name, from_end_date_str, to_end_date_str))
+      #      cr.execute(f"select * from Task_View where project_id = %s and assigned_to_id = %s and current_deadline between  %s and %s ORDER BY current_deadline ", (Filter_projectName, Filter_member_name, from_end_date_str, to_end_date_str))
+      
+      elif Filter_projectName != '' and Filter_member_name == '' and from_end_date_str == '' and to_end_date_str == '' and Filter_status !='' :
+       
+         cr.execute(f"select * from Task_View where project_id = %s and status = %s and assigned_to_id = %s ORDER BY current_deadline", ( Filter_projectName, Filter_status, current_user))
+      
+      else :
+         
+         cr.execute(f"select * from Task_View where assigned_to_id = %s  ORDER BY current_deadline ", (current_user))
 
       return  cr.fetchall()
    
@@ -705,6 +735,113 @@ try:
       return  cr.fetchall()
 
 
+
+
+# # **********************************************************************************************************
+# # ********************************  Gantt Chart      ********************************************
+# # **********************************************************************************************************
+
+   def Gantt_Chart (assigned_by_id):    
+      cr = db.cursor(as_dict=True)
+      cr.execute(f"select [title],[description],[assigned_by_id],[start_date],[current_deadline],[original_end_date],[project_name] from [Task_View] where  assigned_by_id = %s and Dec = 0 and  status <> 'completed' ORDER BY [project_name]", (assigned_by_id))
+      return  cr.fetchall()
+   
+# # **********************************************************************************************************
+
+
+
+# # **********************************************************************************************************
+# # ********************************  filter Gantt Chart      ********************************************
+# # **********************************************************************************************************
+
+   def Gantt_Chart_filter (Filter_projectName, Filter_member_name, from_end_date_str, to_end_date_str,Filter_status,assigned_by_id):    
+      
+      cr = db.cursor(as_dict=True)
+     
+      if Filter_projectName != '' and  Filter_member_name == '' and from_end_date_str == '' and to_end_date_str == '' and Filter_status == '':
+       
+        cr.execute(f"select [title],[description],[assigned_by_id],[start_date],[current_deadline],[original_end_date],[project_name] from [Task_View] where project_id = %s and assigned_by_id = %s and Dec = 0  ORDER BY current_deadline ", (Filter_projectName, assigned_by_id))
+       
+      elif Filter_projectName == '' and Filter_member_name != '' and from_end_date_str == '' and to_end_date_str == '' and Filter_status == '':
+
+        cr.execute(f"select [title],[description],[assigned_by_id],[start_date],[current_deadline],[original_end_date],[project_name] from [Task_View] where assigned_to_user_id = %s and assigned_by_id = %s and Dec = 0 ORDER BY current_deadline ", (Filter_member_name, assigned_by_id))
+
+      elif Filter_projectName == '' and Filter_member_name == '' and from_end_date_str != '' and to_end_date_str != '' and Filter_status == '':
+
+        cr.execute(f"select [title],[description],[assigned_by_id],[start_date],[current_deadline],[original_end_date],[project_name] from [Task_View] where current_deadline between  %s and %s  and assigned_by_id = %s and Dec = 0 ORDER BY current_deadline", (from_end_date_str,to_end_date_str,assigned_by_id,))
+      
+      elif Filter_projectName == '' and Filter_member_name == '' and from_end_date_str == '' and to_end_date_str == '' and Filter_status != '' :
+
+        cr.execute(f"select [title],[description],[assigned_by_id],[start_date],[current_deadline],[original_end_date],[project_name] from [Task_View] where status = %s and assigned_by_id = %s and Dec = 0", (Filter_status, assigned_by_id))
+
+      elif Filter_projectName != '' and Filter_member_name != '' and from_end_date_str == '' and to_end_date_str == '' :
+       
+         cr.execute(f"select [title],[description],[assigned_by_id],[start_date],[current_deadline],[original_end_date],[project_name] from [Task_View] where project_id = %s and assigned_to_user_id = %s and assigned_by_id = %s and Dec = 0 ORDER BY current_deadline", (Filter_projectName, Filter_member_name, assigned_by_id))
+      
+      elif Filter_projectName != '' and Filter_member_name == '' and from_end_date_str != '' and to_end_date_str != '' :
+     
+         cr.execute(f"select [title],[description],[assigned_by_id],[start_date],[current_deadline],[original_end_date],[project_name] from [Task_View] where project_id = %s and current_deadline between  %s and %s and assigned_by_id = %s and Dec = 0 ORDER BY current_deadline ", (Filter_projectName,from_end_date_str,to_end_date_str,assigned_by_id,))
+
+      elif Filter_projectName == '' and Filter_member_name != '' and from_end_date_str != '' and to_end_date_str != '' :
+           
+           cr.execute(f"select [title],[description],[assigned_by_id],[start_date],[current_deadline],[original_end_date],[project_name] from [Task_View] where assigned_to_user_id = %s and current_deadline between  %s and %s and assigned_by_id = %s and Dec = 0 ORDER BY current_deadline ", (Filter_member_name, from_end_date_str, to_end_date_str, assigned_by_id))
+
+      elif Filter_projectName != '' and Filter_member_name != '' and from_end_date_str != '' and to_end_date_str != '' :
+           
+           cr.execute(f"select [title],[description],[assigned_by_id],[start_date],[current_deadline],[original_end_date],[project_name] from [Task_View] where project_id = %s and assigned_to_user_id = %s and current_deadline between  %s and %s and assigned_by_id = %s and Dec = 0 ORDER BY current_deadline ", (Filter_projectName, Filter_member_name, from_end_date_str, to_end_date_str, assigned_by_id))
+       
+      elif Filter_projectName != '' and Filter_member_name == '' and from_end_date_str == '' and to_end_date_str == '' and Filter_status != '':
+       
+         cr.execute(f"select [title],[description],[assigned_by_id],[start_date],[current_deadline],[original_end_date],[project_name] from [Task_View] where project_id = %s and status = %s  and assigned_by_id = %s and Dec = 0 ORDER BY current_deadline", (Filter_projectName, Filter_status, assigned_by_id))
+      
+      elif Filter_projectName == '' and Filter_member_name != '' and from_end_date_str == '' and to_end_date_str == '' and Filter_status != '':
+       
+         cr.execute(f"select [title],[description],[assigned_by_id],[start_date],[current_deadline],[original_end_date],[project_name] from [Task_View] where assigned_to_user_id = %s and status = %s and assigned_by_id = %s and Dec = 0 ORDER BY current_deadline", (Filter_member_name, Filter_status, assigned_by_id))
+      
+      else :
+         
+        cr.execute(f"select [title],[description],[assigned_by_id],[start_date],[current_deadline],[original_end_date],[project_name] from [Task_View] where  assigned_by_id = %s and Dec = 0 and  status <> 'completed' ORDER BY [project_name]", (assigned_by_id))
+
+        
+      return  cr.fetchall()
+   
+# # **********************************************************************************************************
+
+
+
+# **********************************************************************************************************
+# ********************************  ADD log **********************************************************
+# **********************************************************************************************************
+
+   def ADD_to_Log_Table(old_deadline_V, delay_task_log_V, task_id_V):
+      
+      cr.execute(f"INSERT INTO [log_table] (task_id, log_current_deadline,log_text) VALUES (%s, %s, %s)", (task_id_V, old_deadline_V, delay_task_log_V))
+      db.commit()
+
+
+# **********************************************************************************************************
+
+# # **********************************************************************************************************
+# # ********************************  Task Log by _assigned_to     ********************************************
+# # **********************************************************************************************************
+
+   def Log_for_Task_assigned_to_CurrentUser (user_id):    
+      cr = db.cursor(as_dict=True) 
+      cr.execute(f"select * from [Log_View] where assigned_to_id = %s ", (user_id))
+      return  cr.fetchall()
+   
+# **********************************************************************************************************
+
+# # **********************************************************************************************************
+# # ********************************  Task Log by task__assigned_by        ********************************************
+# # **********************************************************************************************************
+
+   def Log_for_Task_assigned_by_CurrentUser (user_id):    
+      cr = db.cursor(as_dict=True) 
+      cr.execute(f"select * from [Log_View] where assigned_by_id = %s ", (user_id))
+      return  cr.fetchall()
+   
+# **********************************************************************************************************
 
 
 except Exception as e:

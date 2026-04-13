@@ -399,7 +399,36 @@ function Search_Fun() {
   }
 }
 
+// ************************  for filter log by task id ***********************************
 
+
+
+  function filterRows() {
+
+    const hiddenInput = document.getElementById('log-task-id');
+    const rows = document.querySelectorAll('#logs-tbody .task-row');
+    const selectedTaskId = hiddenInput.value;
+
+    rows.forEach(row => {
+      if (!selectedTaskId || row.dataset.taskId === selectedTaskId) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+}
+  
+document.getElementById('taskLogModal').addEventListener('show.bs.modal', function (event) {
+    console.log("Task Log Modal is being shown");
+  
+    const button = event.relatedTarget;
+    const taskId = button.getAttribute('data-task-id');
+  
+    console.log(taskId)
+  
+    document.getElementById('log-task-id').value = taskId;
+    filterRows();
+  });
 
 
 

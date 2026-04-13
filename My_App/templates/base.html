@@ -20,6 +20,12 @@
 
   <!-- JS -->
   <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
+  <!-- Chart js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+
 </head>
 
 <body>
@@ -72,15 +78,14 @@
       <!-- Sidebar for larger screens -->
       <div class="sidebar d-none d-md-block" style="width: 12%">
         <div class="text-center mb-4 pt-2">
-          <div class="bg-white text-primary rounded-circle d-inline-flex align-items-center justify-content-center"
-            style="
+          <div class="text-primary rounded-circle d-inline-flex align-items-center justify-content-center" style="
                 width: 80px;
                 height: 80px;
                 font-size: 1.8rem;
                 font-weight: bold;
                 margin-bottom: 10px;
               ">
-            <img src="{{ url_for('static', filename='images/tabarak.png') }}" width="55" height="55"
+            <img src="{{ url_for('static', filename='images/tabarak.png') }}" width="120" height="120"
               style="border-radius: 3px" />
           </div>
           <h5 class="text-white fw-bold">TaskFlow</h5>
@@ -119,6 +124,14 @@
             <a class="nav-link" href="{{ url_for('Projects') }}">
               <i class="bi bi-bank" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Projects"></i> <span
                 class="side_text">Projects</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('Gantt_Chart') }}">
+              <i class="bi bi-bar-chart-steps" data-bs-toggle="tooltip" data-bs-placement="top"
+                data-bs-title="Gantt Chart"></i>
+              <span class="side_text">Gantt Chart</span>
             </a>
           </li>
 

@@ -59,9 +59,10 @@
         </div>
 
         <div class="col-md-6">
-          <label for="user_telegram_OK" class="form-label fw-bold">Dec <span class="text-danger">*</span></label>
+          <label for="user_telegram_OK" class="form-label fw-bold">Telegram Index <span
+              class="text-danger">*</span></label>
           <select class="form-select" id="user_telegram_OK" name="user_telegram_OK" required>
-            <option value="">Select use need telegram or not</option>
+            <option value="">Select user need telegram or not</option>
             <option value="0" {% if users[7]==0 %} selected {% endif %}>False</option>
             <option value="1" {% if users[7]==1 %} selected {% endif %}>True</option>
           </select>
